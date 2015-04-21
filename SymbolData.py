@@ -1,3 +1,4 @@
+
 import xml.etree.ElementTree as ET
 import matplotlib as MP
 import numpy as NP
@@ -84,6 +85,9 @@ class Symbol:
             self.normalize()
         self.correctClass = correctClass
 
+    def __str__(self):
+        return self.strokes
+
     def plot(self, show = True, clear = True):
         if clear:
             PLT.clf()
@@ -163,8 +167,8 @@ class Expression:
 
     def writeLG (self, directory, clss = None):
         self.filename = os.path.join(directory, (self.name + '.lg'))
-        else:
-            self.filename = directory + self.name + '.lg'
+        # else:
+        #     self.filename = directory + self.name + '.lg'
         if (clss == None):
             print ("none clss")
             assert (len (list(self.classes)) == len (list(self.symbols)))
@@ -201,12 +205,29 @@ defaultClasses = ['!', '(', ')', '+', '-', '.', '/', '0', '1', '2', '3', '4', '5
 # This stuff is used for reading strokes and symbols from files.
 
 
+
 def readStroke(root, strokeNum):
     strokeElem = root.find("./{http://www.w3.org/2003/InkML}trace[@id='" + repr(strokeNum) + "']")
+
+    strokeText = strokeElem.text.strip()
+    pointStrings = strokeText.split(',')
+
+    points = list(map( (lambda s: [float(n) for n in (s.strip()).split(' ')]), pointStrings))
+    return Stroke(points, flip=True, ident=strokeNum)
+
+def readStrokeNew(root, strokeNum):
+    # print root, str(strokeNum)
+    strokeElems = root.findall("./{http://www.w3.org/2003/InkML}trace")
+
+    for e in strokeElems:
+        if e.attrib['id'] == strokeNum:
+            strokeElem = e 
+    # print strokeElem
     strokeText = strokeElem.text.strip()
     pointStrings = strokeText.split(',')
     points = list(map( (lambda s: [float(n) for n in (s.strip()).split(' ')]), pointStrings))
     return Stroke(points, flip=True, ident=strokeNum)
+
 
 #Are there any other substitutions of this type we need to make? Come back to this.
 def doTruthSubs(text):
@@ -215,13 +236,16 @@ def doTruthSubs(text):
     else: 
         return text
 
+
 def readSymbol(root, tracegroup):
     truthAnnot = tracegroup.find(".//{http://www.w3.org/2003/InkML}annotation[@type='truth']")
     identAnnot = tracegroup.find(".//{http://www.w3.org/2003/InkML}annotationXML")    
     strokeElems = tracegroup.findall('.//{http://www.w3.org/2003/InkML}traceView')
     assert( len(strokeElems) != 0)
     strokeNums = list(map( (lambda e: int(e.attrib['traceDataRef'])), strokeElems)) #ensure that all these are really ints if we have trouble.
+
     strokes = list(map( (lambda n: readStroke(root, n)), strokeNums))
+
     if (truthAnnot == None):
         truthText = None
     else:
@@ -233,21 +257,37 @@ def readSymbol(root, tracegroup):
         idnt = str(strokeNums).replace(', ', '_')
     else:
         idnt = identAnnot.attrib['href'].replace(',', 'COMMA')
-    return Symbol(strokes, correctClass=truthText, norm=True, ident=idnt )
+    return Symbol(strokes, correctClass=truthText, norm=False, ident=idnt )
     
-    
+def constructTraceGroupsFromSymbols(root, traces):
+    symbols = []
+    for trace in traces:
+        sID = trace.attrib['id']
+        s = readStrokeNew(root, sID)
+        # print s
+        s = Symbol([s])
+        symbols.append(s)
+    return symbols
+
+
 def readFile(filename, warn=False):
     try:
         #print (filename)
         tree = ET.parse(filename)
         root = tree.getroot()
-        tracegroups = root.findall('./*/{http://www.w3.org/2003/InkML}traceGroup')
-        symbols = list(map((lambda t: readSymbol(root, t)), tracegroups))
-        return symbols
+        traces = root.findall('./{http://www.w3.org/2003/InkML}trace')
+        tracegroups = constructTraceGroupsFromSymbols(root, traces)
+
+        # print tracegroups
+        print tracegroups
+        # symbols = list(map((lambda t: readSymbol(root, t)), tracegroups))
+        return tracegroups
     except:
         if warn:
             print("warning: unparsable file.")
         return []
+
+
 
 def fnametolg(filename, lgdir):
     fdir, fname = os.path.split(filename)
