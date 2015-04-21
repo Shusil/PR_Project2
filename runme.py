@@ -110,15 +110,55 @@ def findCrossing(stk1,ind1,stk2,ind2):
         ((dist(p21,I)+dist(I,p22)-dist(p21,p22))<10**-5)):
             return True
     return False
+    
+def getCrossStroke(expr):
+    l = len(expr.strokes)
+    i = 0
+    crossStrokes = []
+    index = NP.array([])
+    while(i<l):
+        if(sum(index==i)>0):
+            i = i+1
+            continue
+        stks = NP.array([i])
+        t = min(i+5,l)
+        for j in range(i+1,t):
+            minDist,ind1,ind2 = getMinDist(expr.strokes[i],expr.strokes[j])
+            if(findCrossing(expr.strokes[i],ind1,expr.strokes[j],ind2)):
+                stks = NP.append(stks,j)
+        index = NP.append(index,stks)
+        crossStrokes.append(list(map(lambda i: expr.strokes[i],stks)))
+        i = i+1
+    return(crossStrokes)
 
 exprs = SymbolData.readInkmlDirectory('inkml','lg')
 #exprs , classes= SymbolData.unpickleSymbols("test.dat")
 #symbols = SymbolData.allSymbols(exprs)
 #scale = 99
 #symbols = SymbolData.normalize(symbols,scale)
-expr = exprs[3]
+expr = exprs[10]
 plt.figure()
 expr.plot()
+crossStrokes = getCrossStroke(expr)
+
+# Based on crossing
+#l = len(expr.strokes)
+#i = 0
+#crossStrokes = []
+#index = NP.array([])
+#while(i<l):
+#    if(sum(index==i)>0):
+#        i = i+1
+#        continue
+#    stks = NP.array([i])
+#    t = min(i+5,l)
+#    for j in range(i+1,t):
+#        minDist,ind1,ind2 = getMinDist(expr.strokes[i],expr.strokes[j])
+#        if(findCrossing(expr.strokes[i],ind1,expr.strokes[j],ind2)):
+#            stks = NP.append(stks,j)
+#    index = NP.append(index,stks)
+#    crossStrokes.append(list(map(lambda i: expr.strokes[i],stks)))
+#    i = i+1
 
 # Based on bounding box
 #l = len(expr.strokes)
@@ -164,25 +204,6 @@ expr.plot()
 #    index = NP.append(index,stks)
 #    crossStrokes.append(list(map(lambda i: expr.strokes[i],stks)))
 #    i = i+1
-    
-# Based on crossing
-l = len(expr.strokes)
-i = 0
-crossStrokes = []
-index = NP.array([])
-while(i<l):
-    if(sum(index==i)>0):
-        i = i+1
-        continue
-    stks = NP.array([i])
-    t = min(i+5,l)
-    for j in range(i+1,t):
-        minDist,ind1,ind2 = getMinDist(expr.strokes[i],expr.strokes[j])
-        if(findCrossing(expr.strokes[i],ind1,expr.strokes[j],ind2)):
-            stks = NP.append(stks,j)
-    index = NP.append(index,stks)
-    crossStrokes.append(list(map(lambda i: expr.strokes[i],stks)))
-    i = i+1
 
 #i=0
 #for symbol in symbols:
