@@ -3,6 +3,7 @@ import matplotlib as MP
 import numpy as NP
 import matplotlib.pyplot as PLT
 from pylab import *
+from pandas import *
 import os
 import shutil
 import re
@@ -21,12 +22,16 @@ from functools import reduce
 class Stroke:
     """Represents a stroke as an n by 2 matrix, with the rows of
       the matrix equivelent to points from first to last. """
-    def __init__(self, points, flip = False, ident = None):
+    def __init__(self, points, flip = False, ident = None, smoothPoints = True):
         self.ident = ident
         self.xs = []
         self.ys = []
+        if(smoothPoints):
+            points = DataFrame(points).drop_duplicates().values
         for point in points:
             self.addPoint(point, flip)
+        if(smoothPoints):
+            self.smoothPoints()
 
     def plot(self, show = True, clear = True):
         if clear:
@@ -42,7 +47,13 @@ class Stroke:
             self.ys.append(-1 * point[1])
         else:
             self.ys.append(point[1])
-
+            
+    def smoothPoints(self):
+        l = len(self.xs)
+        for i in range(1,l-1):
+            self.xs[i] = (self.xs[i-1]+self.xs[i]+self.xs[i+1])/3
+            self.ys[i] = (self.ys[i-1]+self.ys[i]+self.ys[i+1])/3
+            
     def asPoints(self):
         return (list(zip(self.xs, self.ys)))
 
@@ -154,12 +165,65 @@ class Symbol:
 # Holds the symbols from an inkml file.
 class Expression:
 
-    def __init__(self, name, symbols, relations):
+    def __init__(self, name, symbols, relations, norm = True):
         self.name = name
         self.symbols = symbols
+        self.strokes = functools.reduce((lambda a,b: a+b), list(map((lambda symbol: symbol.strokes), self.symbols)))
         self.relations = relations
+        if norm:
+            self.normalize()
         self.classes = []
 
+    def plot(self, show = True, clear = True):
+        if clear:
+            PLT.clf()
+        
+        for stroke in self.strokes:
+            stroke.plot(show = False, clear = False)
+        if show:
+            PLT.show()
+
+    def xmin(self):
+        return min(list(map( (lambda stroke: stroke.xmin()), self.strokes)))
+
+    def xmax(self):
+        return max(list(map( (lambda stroke: stroke.xmax()), self.strokes)))
+
+    def ymin(self):
+        return min(list(map( (lambda stroke: stroke.ymin()), self.strokes)))
+
+    def ymax(self):
+        return max(list(map( (lambda stroke: stroke.ymax()), self.strokes)))
+
+    def points(self):
+        return functools.reduce( (lambda a, b : a + b), (list(map ((lambda f: f.asPoints()), self.strokes))), [])
+
+    def xs(self):
+        return functools.reduce( (lambda a, b : a + b), (list(map ((lambda f: f.xs), self.strokes))), [])
+
+    def ys(self):
+        return functools.reduce( (lambda a, b : a + b), (list(map ((lambda f: f.ys), self.strokes))), [])
+    
+    def normalize(self):
+
+        self.xscale = 1.0
+        self.yscale = 1.0
+        self.xdif = self.xmax() - self.xmin()
+        self.ydif = self.ymax() - self.ymin()
+        #look out for a divide by zero here.
+        #Would fix it, but still not quite sure what the propper way to handel it is.
+        if (self.xdif > self.ydif):
+            self.yscale = (self.ydif * 1.0) / self.xdif
+        elif (self.ydif > self.xdif):
+            self.xscale = (self.xdif * 1.0) / self.ydif
+
+        self.myxmin = self.xmin()
+        self.myxmax = self.xmax()
+        self.myymin = self.ymin()
+        self.myymax = self.ymax()
+        
+        for stroke in self.strokes:
+            stroke.scale(self.myxmin, self.myxmax, self.myymin, self.myymax, self.xscale, self.yscale)
 
     def writeLG (self, directory, clss = None):
         self.filename = os.path.join(directory, (self.name + '.lg'))
@@ -204,7 +268,7 @@ def readStroke(root, strokeNum):
     strokeText = strokeElem.text.strip()
     pointStrings = strokeText.split(',')
     points = list(map( (lambda s: [float(n) for n in (s.strip()).split(' ')]), pointStrings))
-    return Stroke(points, flip=True, ident=strokeNum)
+    return Stroke(points, flip=True, ident=strokeNum, smoothPoints=True)
 
 #Are there any other substitutions of this type we need to make? Come back to this.
 def doTruthSubs(text):
@@ -231,7 +295,7 @@ def readSymbol(root, tracegroup):
         idnt = str(strokeNums).replace(', ', '_')
     else:
         idnt = identAnnot.attrib['href'].replace(',', 'COMMA')
-    return Symbol(strokes, correctClass=truthText, norm=True, ident=idnt )
+    return Symbol(strokes, correctClass=truthText, norm=False, ident=idnt )
     
     
 def readFile(filename, warn=False):
@@ -261,7 +325,7 @@ def readInkml(filename, lgdir, warn=False):
     lgfile = fnametolg(filename, lgdir)
 
 
-    return Expression(name, symbols, readLG(lgfile))
+    return Expression(name, symbols, readLG(lgfile), norm=True)
     
 
 def readLG(filename):
@@ -492,3 +556,6 @@ def normalize(symbols,scale):
         symbols[k] = symbol
         k+=1    
     return(symbols)
+
+def getBBoxStorke(stroke):
+    return(list([stroke.xmin(),stroke.ymin(),stroke.xmax(),stroke.ymax()]))
