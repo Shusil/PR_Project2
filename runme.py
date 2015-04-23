@@ -9,6 +9,7 @@ import Features
 import numpy as NP
 import matplotlib.pyplot as plt
 from scipy.spatial import distance
+import train
 #from PIL import Image, ImageDraw
 
 def doBboxOverlap(bbox1,bbox2):
@@ -131,15 +132,16 @@ def getCrossStroke(expr):
         i = i+1
     return(crossStrokes)
 
-exprs = SymbolData.readInkmlDirectory('inkml','lg')
-#exprs , classes= SymbolData.unpickleSymbols("test.dat")
+#exprs , classes= SymbolData.unpickleSymbols("train.dat")
 #symbols = SymbolData.allSymbols(exprs)
-#scale = 99
+#scale = 29
 #symbols = SymbolData.normalize(symbols,scale)
-expr = exprs[10]
-plt.figure()
-expr.plot()
-crossStrokes = getCrossStroke(expr)
+
+#exprs = SymbolData.readInkmlDirectory('inkml','lg')
+#expr = exprs[10]
+#plt.figure()
+#expr.plot()
+#crossStrokes = getCrossStroke(expr)
 
 # Based on crossing
 #l = len(expr.strokes)
@@ -208,5 +210,7 @@ crossStrokes = getCrossStroke(expr)
 #i=0
 #for symbol in symbols:
 #    print(i)
-#    I = Features.features(symbol)
+#    I = Features.symbolFeatures(symbol)
 #    i+=1
+
+train.main(['-rf', 'RF20_MaxDepth.mdl', 'train', 'trainLg'])
