@@ -1,2 +1,8 @@
 __pycache__/Features.cpython-34.pyc
 *.pyc
+inkml
+lgdir
+test
+testLg
+train
+trainLg
