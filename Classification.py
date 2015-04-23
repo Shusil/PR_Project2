@@ -43,7 +43,7 @@ def train(model, training, keys, pca_num=None):
         model = OneNN()
     elif model == "rf":
         model = makeRF()
-    training = SymbolData.normalize(training, 99)
+    training = SymbolData.normalize(training, 29)
     f = Features.features(training)
     pca = None
     if (pca_num != None):
@@ -89,7 +89,7 @@ def classifyExpressions(expressions, keys, model, pca, renormalize=True, showAcc
 def classifyExpression(expression, keys, model, pca, renormalize=True):
     symbs = expression.symbols
     if renormalize:
-        symbs = SymbolData.normalize(symbs, 99)
+        symbs = SymbolData.normalize(symbs, 29)
     f = Features.features(symbs)
     if (len (symbs) == 0):
         print(expression.name, " has no valid symbols!")
