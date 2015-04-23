@@ -10,6 +10,7 @@ import re
 import random
 import numpy.random
 import scipy.stats
+from pandas import *
 import pickle
 import functools
 import itertools
@@ -269,13 +270,12 @@ def readStroke(root, strokeNum):
     strokeText = strokeElem.text.strip()
     pointStrings = strokeText.split(',')
     points = list(map( (lambda s: [float(n) for n in (s.strip()).split(' ')]), pointStrings))
-    return Stroke(points, flip=True, ident=strokeNum, smoothPoints=True)
+    return Stroke(points, flip=True, ident=strokeNum)
 
 
 def readStrokeNew(root, strokeNum):
     # print root, str(strokeNum)
     strokeElems = root.findall("./{http://www.w3.org/2003/InkML}trace")
-
     for e in strokeElems:
         if e.attrib['id'] == strokeNum:
             strokeElem = e 
@@ -283,7 +283,7 @@ def readStrokeNew(root, strokeNum):
     strokeText = strokeElem.text.strip()
     pointStrings = strokeText.split(',')
     points = list(map( (lambda s: [float(n) for n in (s.strip()).split(' ')]), pointStrings))
-    return Stroke(points, flip=True, ident=strokeNum, smoothPoints=True)
+    return Stroke(points, flip=True, ident=strokeNum)
 
 
 #Are there any other substitutions of this type we need to make? Come back to this.
@@ -320,19 +320,16 @@ def constructTraceGroupsFromSymbols(root, traces):
     symbols = []
     for trace in traces:
         sID = trace.attrib['id']
+        # print 'reading'
         s = readStrokeNew(root, sID)
+        # print 'read'
         # print s
         s = Symbol([s])
         symbols.append(s)
 
-    """merge: 
-    takes a list of Symbol Objects and returns a list of Symbol objects, merged
-    ex: [Symbol(1), Symbol(2), Symbol(3), Symbol(4)] ->  [Symbol(1), Symbol(2, 3), Symbol(4)]
-
-
-    """
-    symbols = merge(symbols)
-
+    # print 'here'
+    # symbols = merge(symbols)
+    # print symbols
 
     return symbols
 
@@ -344,14 +341,26 @@ def readFile(filename, warn=False):
         root = tree.getroot()
         traces = root.findall('./{http://www.w3.org/2003/InkML}trace')
         tracegroups = constructTraceGroupsFromSymbols(root, traces)
-
-        # print tracegroups
+        print tracegroups[0]
         return tracegroups
     except:
         if warn:
             print("warning: unparsable file.")
         return []
-
+"""Below is the old readFile method"""
+# def readFile(filename, warn=False):
+#     try:
+#         #print (filename)
+#         tree = ET.parse(filename)
+#         root = tree.getroot()
+#         tracegroups = root.findall('./*/{http://www.w3.org/2003/InkML}traceGroup')
+#         symbols = list(map((lambda t: readSymbol(root, t)), tracegroups))
+#         print symbols[0]
+#         return symbols
+#     except:
+#         if warn:
+#             print("warning: unparsable file.")
+        # return []
 
 
 def fnametolg(filename, lgdir):
