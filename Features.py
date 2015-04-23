@@ -1,6 +1,6 @@
 import numpy as NP
 #import SymbolData
-from skimage.morphology import disk, binary_closing
+from skimage.morphology import binary_closing, square
 from skimage.filter import rank
 #from skimage.transform import rescale
 from sklearn import preprocessing
@@ -47,18 +47,20 @@ def features(symbols):
 #       return I
 
 def getImg(symbol):
-    I = Image.new("L",(round(max(symbol.xs()))+1,round(max(symbol.ys()))+1))
+#    I = Image.new("L",(round(max(symbol.xs()))+1,round(max(symbol.ys()))+1))
+    I = Image.new("L",(30,30))
     for stroke in symbol.strokes:
         p = stroke.asPoints()
         draw = ImageDraw.Draw(I)
         draw.line(p,fill=255)  
-    img = NP.asarray(list(I.getdata()))
+    img = NP.asarray(list(I.getdata()),dtype=NP.uint8)
     img = NP.reshape(img,(I.size[1],I.size[0]))
     if(img.max()>0):
         img = img/img.max()
-    if(min(img.shape)>2):
-        img = rank.mean(img, selem=disk(1))
-        img = binary_closing(img,selem=disk(1))
+#    if(min(img.shape)>2):
+    img = rank.mean(img, selem=square(1))
+    img = binary_closing(img,selem=square(1))
+    if(img.max()>0):
         img = img/img.max()
 #    scale = max(img.shape)/img.shape[0]
 #    if(scale!=1):
@@ -90,11 +92,15 @@ def symbolFeatures(symbol):
     
     I = getImg(symbol)
     fkiFeat = getFKIfeatures(I)
-    fki = getMeanStd(fkiFeat)
-    f = NP.append(f,fki)
-    RWTHFeat = getRWTHfeatures(I,5,30)
-    RWTH = getMeanStd(RWTHFeat)
-    f = NP.append(f,RWTH)
+    l = fkiFeat.shape[0]
+    for i in range(0,l,5):
+        fki = getMeanStd(fkiFeat[i:i+5,:])
+        f = NP.append(f,fki)
+    RWTHFeat = getRWTHfeatures(I,3,10)
+    l = RWTHFeat.shape[0]
+    for i in range(0,l,4):
+        RWTH = getMeanStd(RWTHFeat)
+        f = NP.append(f,RWTH)
     
     #the minimum, basic scaling needed for many classifiers to work corectly.
     f_scaled = preprocessing.scale(f)
@@ -308,5 +314,4 @@ def pickleFeatures(feat, filename):
 def unpickleFeatures(filename):
     with open(filename, 'rb') as f:
         return pickle.load(f)
-
 
