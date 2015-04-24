@@ -7,7 +7,7 @@ import SymbolData
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score
 from functools import reduce
-
+import pickle
 
 #1-NN classifier. Pretends to be a sklearn model, so we can use the same code.
 class OneNN:
@@ -78,13 +78,26 @@ def classifyExpressions(expressions, keys, model, pca, renormalize=True, showAcc
         preds = preds + [predicted]
         print(i, "/",tot)
         i+=1
-        #print (correct, " -> ", predicted)
-
-        
+        #print (correct, " -> ", predicted)        
 #    if s :
 #        print (cors)
 #        print( "Accuracy on testing set : ", accuracy_score(NP.concatenate(cors), NP.concatenate(preds)))
     return (cors, preds)
+
+with open('RF20_FullDepth.mdl', 'rb') as f:
+    model, pca, keys =  pickle.load(f)
+def classifySymbol(symb, keys=keys, model=model, pca=pca, renormalize=True):
+    import copy
+    symb = [copy.deepcopy(symb)]
+    if renormalize:
+        symb = SymbolData.normalize(symb, 29)
+    f = Features.features(symb)
+    
+    if (pca != None):
+        f = pca.transform(f)
+    pred = model.predict_proba(f)
+    return pred
+    
     
 def classifyExpression(expression, keys, model, pca, renormalize=True):
     symbs = expression.symbols

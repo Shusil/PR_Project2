@@ -132,10 +132,11 @@ def getCrossStroke(expr):
         i = i+1
     return(crossStrokes)
 
-#exprs , classes= SymbolData.unpickleSymbols("train.dat")
-#symbols = SymbolData.allSymbols(exprs)
-#scale = 29
-#symbols = SymbolData.normalize(symbols,scale)
+exprs , classes= SymbolData.unpickleSymbols("train.dat")
+symbols = SymbolData.allSymbols(exprs)
+scale = 29
+symbols = SymbolData.normalize(symbols,scale)
+
 
 #exprs = SymbolData.readInkmlDirectory('inkml','lg')
 #expr = exprs[10]

@@ -1,4 +1,3 @@
-
 import xml.etree.ElementTree as ET
 import matplotlib as MP
 import numpy as NP
@@ -14,7 +13,7 @@ from pandas import *
 import pickle
 import functools
 from scipy.spatial import distance
-
+import Classification
 import itertools
 from functools import reduce
 
@@ -25,16 +24,19 @@ from functools import reduce
 class Stroke:
     """Represents a stroke as an n by 2 matrix, with the rows of
       the matrix equivelent to points from first to last. """
-    def __init__(self, points, flip = False, ident = None, smoothPoints = True):
+    def __init__(self, points, flip=False, ident=None, smooth=True, resample=True, npts=30):
         self.ident = ident
         self.xs = []
         self.ys = []
-        if(smoothPoints):
+#        print('prenorm', points)
+        if(smooth):
             points = DataFrame(points).drop_duplicates().values
+            points = smoothPoints(points)
+        if(resample):
+            points = resamplePoints(points,npts)
         for point in points:
             self.addPoint(point, flip)
-        if(smoothPoints):
-            self.smoothPoints()
+#        print('postnorm', self.xs)
 
     def plot(self, show = True, clear = True):
         if clear:
@@ -50,12 +52,7 @@ class Stroke:
             self.ys.append(-1 * point[1])
         else:
             self.ys.append(point[1])
-            
-    def smoothPoints(self):
-        l = len(self.xs)
-        for i in range(1,l-1):
-            self.xs[i] = (self.xs[i-1]+self.xs[i]+self.xs[i+1])/3
-            self.ys[i] = (self.ys[i-1]+self.ys[i]+self.ys[i+1])/3
+#            self.ys[i] = (self.ys[i-1]+self.ys[i]+self.ys[i+1])/3
             
     def asPoints(self):
         return (list(zip(self.xs, self.ys)))
@@ -91,7 +88,8 @@ class Stroke:
     
 class Symbol:
     """Represents a symbol as a list of strokes. """
-    def __init__(self, strokes, correctClass = None, norm = True, ident = None):
+    def __init__(self, strokes, correctClass = None, norm = False, ident = None):
+        assert strokes != None
         self.strokes = strokes
         self.ident = ident
         if norm:
@@ -150,13 +148,14 @@ class Symbol:
 
     # Given a class, this produces lines for an lg file.
     def lgline(self, clss):
+        print("STROKES", self.strokes)
         self.line = 'O, ' + self.ident + ', ' + clss + ', 1.0, ' + (', '.join(list(map((lambda s: str(s.ident)), self.strokes)))) + '\n'
         #do we need a newline here? Return to this if so.        
         return self.line
             
     def __str__(self):
         self.strng = 'Symbol'
-        if self.correctClass != '':
+        if self.correctClass != '' and self.correctClass != None:
             self.strng = self.strng + ' of class ' + self.correctClass
         self.strng = self.strng + ':\n Strokes:'
         for stroke in self.strokes:
@@ -174,6 +173,8 @@ class Expression:
 #        symbols[0].plot()
 #        self.strokes = functools.reduce((lambda a,b: a+b), list(map((lambda symbol: symbol.strokes), self.symbols)))
         self.strokes = []
+#        print("CONSTRUCTING")
+#        print(symbols)
         for s in symbols:
             self.strokes.extend(s.strokes)
 #            print(s.strokes)
@@ -193,7 +194,6 @@ class Expression:
             PLT.show()
 
     def xmin(self):
-        print("In XMIN")
 #        return -1
 #        print(self.strokes)
 #        return 0
@@ -204,6 +204,7 @@ class Expression:
     def xmax(self):
 #        print("In XMAX")
 #        return 0
+#        print(self.strokes)
         return max(list(map( (lambda stroke: stroke.xmax()), self.strokes)))
 
     def ymin(self):
@@ -222,7 +223,9 @@ class Expression:
         return functools.reduce( (lambda a, b : a + b), (list(map ((lambda f: f.ys), self.strokes))), [])
     
     def normalize(self):
-        return
+#        return
+#        for s in self.symbols:
+#            print(s)
         self.xscale = 1.0
         self.yscale = 1.0
         self.xdif = self.xmax() - self.xmin()
@@ -260,6 +263,8 @@ class Expression:
         #print (self.clss)
         #for c in (self.clss):
             #print ( c)
+        print('clss', self.clss)
+        print(len(self.symbols))
         for symbol in self.symbols:
            # print (self.i)
             self.symblines.append(symbol.lgline(self.clss[self.i]))
@@ -285,8 +290,8 @@ def readStroke(root, strokeNum):
     strokeElem = root.find("./{http://www.w3.org/2003/InkML}trace[@id='" + repr(strokeNum) + "']")
     strokeText = strokeElem.text.strip()
     pointStrings = strokeText.split(',')
-    points = list(map( (lambda s: [float(n) for n in (s.strip()).split(' ')]), pointStrings))
-    return Stroke(points, flip=True, ident=strokeNum)
+    points = list(map( (lambda s: [float(n) for n in (s.strip()).split(' ')[:2]]), pointStrings))
+    return Stroke(points, flip=True, ident=strokeNum, smooth=True, resample=True, nPts=30)
 
 
 def readStrokeNew(root, strokeNum):
@@ -298,7 +303,9 @@ def readStrokeNew(root, strokeNum):
     # print strokeElem
     strokeText = strokeElem.text.strip()
     pointStrings = strokeText.split(',')
-    points = list(map( (lambda s: [float(n) for n in (s.strip()).split(' ')]), pointStrings))
+#    print(pointStrings[:10])
+    points = list(map( (lambda s: [float(n) for n in (s.strip()).split(' ')[:2]]), pointStrings))
+    
     return Stroke(points, flip=True, ident=strokeNum)
 
 
@@ -340,7 +347,7 @@ def constructTraceGroupsFromSymbols(root, traces):
         s = readStrokeNew(root, sID)
         # print 'read'
         # print s
-        s = Symbol([s])
+        s = Symbol([s], ident='x_')
         symbols.append(s)
 
     # print 'here'
@@ -351,32 +358,36 @@ def constructTraceGroupsFromSymbols(root, traces):
 
 
 
-def readFile(filename, warn=False):
-    try:
-        #print (filename)
-        tree = ET.parse(filename)
-        root = tree.getroot()
-        traces = root.findall('./{http://www.w3.org/2003/InkML}trace')
-        tracegroups = constructTraceGroupsFromSymbols(root, traces)
-        return tracegroups
-    except:
-        if warn:
-            print("warning: unparsable file.")
-        return []
-"""Below is the old readFile method"""
-# def readFile(filename, warn=False):
-#     try:
-#         #print (filename)
-#         tree = ET.parse(filename)
-#         root = tree.getroot()
-#         tracegroups = root.findall('./*/{http://www.w3.org/2003/InkML}traceGroup')
-#         symbols = list(map((lambda t: readSymbol(root, t)), tracegroups))
-##         print symbols[0]
-#         return symbols
-#     except:
-#         if warn:
-#             print("warning: unparsable file.")
-#         return []
+def readFile(filename, warn=True, train=False):
+    if not train:
+        try:
+            print ("Parsing", filename)
+            tree = ET.parse(filename)
+    #        print("PARSED")
+            root = tree.getroot()
+            traces = root.findall('./{http://www.w3.org/2003/InkML}trace')
+    #        print("Got traces")
+            tracegroups = constructTraceGroupsFromSymbols(root, traces)
+    #        print("Returning", tracegroups)
+            return tracegroups
+        except:
+            print("Unparsable file")
+            if warn:
+                print("warning: unparsable file.")
+            return []
+    else:
+         try:
+             #print (filename)
+             tree = ET.parse(filename)
+             root = tree.getroot()
+             tracegroups = root.findall('./*/{http://www.w3.org/2003/InkML}traceGroup')
+             symbols = list(map((lambda t: readSymbol(root, t)), tracegroups))
+    #         print symbols[0]
+             return symbols
+         except:
+             if warn:
+                 print("warning: unparsable file.")
+             return []
 
 
 def fnametolg(filename, lgdir):
@@ -390,28 +401,70 @@ def mergeFromCrossings(exp):
 #    print(len(crossings), 'crossings', len(exp.symbols), 'symbols')
 #    for c in crossings:
 #        print(c)
-    crossers = set()
+#    crossers = set()
     allSymbols = []
 
     for s in crossings:
-        sym = Symbol(s)
+        sym = Symbol(s, ident='x_')
         allSymbols.append(sym)
     e = Expression(exp.name, allSymbols, exp.relations)
 #    print(len(allSymbols), len(exp.symbols))
 #    e.symbols[0].plot()
     return e
     
-    
+def mergeFromRecog(e):
+    l = len(e.symbols)
+    potentials = []
+    for x in range(l-1):
+        potMerge = [e.symbols[x], e.symbols[x+1], x]
+        potentials.append(potMerge)
+    for pair in potentials:
+        cl1 = Classification.classifySymbol(pair[0])
+        cl2 = Classification.classifySymbol(pair[1])
+#        print(cl1)
+        strokes = []
+        for stroke in pair[0].strokes:
+            strokes.append(stroke)
+        for stroke in pair[1].strokes:
+            strokes.append(stroke)
+        mergedSymb = Symbol(strokes, ident='m_')
+        clBoth = Classification.classifySymbol(mergedSymb)
+        newESymbols = []
+#        print(max(clBoth))
+        if max(clBoth[0]) * 2 > max(max(cl1[0]), max(cl2[0])):
+            print("MERGING", pair[2], pair[2] + 1)
+#            mergedSymb.plot()
+            for symbol in range(l-1):
+                if symbol != pair[2] and symbol != pair[2] + 1:
+                    print("ADDING ORIG SYMBOL", symbol)
+                    newESymbols.append(e.symbols[symbol])
+                elif symbol == x:
+                    newESymbols.append(mergedSymb)
+            return Expression(name=e.name, symbols=newESymbols, relations=e.relations, norm=False)
+    return e
     
 # this returns an expression class rather than just a list of symbols.
 def readInkml(filename, lgdir, warn=False):
-    symbols = readFile(filename, warn)
+    symbols = readFile(filename, warn, False) #trainis the last param
     rdir, filenm = os.path.split(filename)
     name, ext = os.path.splitext(filenm)
     lgfile = fnametolg(filename, lgdir)
-
-    e = Expression(name, symbols, readLG(lgfile))
+    if symbols == []:
+        tmp = Stroke([[0,0],[1,1]])
+        symbols = [Symbol([tmp], ident='y_')]
+    e = Expression(name, symbols, readLG(lgfile), norm=True)
+    print("PREMERGE SYMBOLS", len(e.symbols))
     e = mergeFromCrossings(e)
+    print("AfterCross SYMBOLS", len(e.symbols))
+    eNew = None
+    while(eNew != e):
+        eNew = mergeFromRecog(e)
+        e = eNew
+#    e = mergeFromRecog(e)
+    if 'bert' in filename:
+        e.plot()
+    print("AfterRecog SYMBOLS", len(e.symbols))
+
     return e
     
 
@@ -771,3 +824,30 @@ def getCrossStroke(expr):
         crossStrokes.append(list(map(lambda i: expr.strokes[i],stks)))
         i = i+1
     return(crossStrokes)
+
+def smoothPoints(points):
+    l = points.shape[0]
+    for i in range(1,l-1):
+        points[i] = (points[i-1]+points[i]+points[i+1])/3
+    return points
+
+def resamplePoints(points,npts):
+    newPts = NP.zeros((npts,2))
+    n = points.shape[0]
+    if(n<2):
+        return(NP.repeat(points,npts,axis=0))
+    L = NP.zeros((n))
+    for i in range(1,n):
+        L[i] = L[i-1]+NP.linalg.norm(points[i]-points[i-1])
+    dist = L[n-1]/npts
+    
+    newPts[0] = points[0]
+    j = 0
+    for p in range(1,npts-1):
+        while(L[j]<p*dist):
+            j=j+1
+        C = (p*dist-L[j-1])/(L[j]-L[j-1])
+        newPts[p,0] = points[j-1,0]+(points[j,0]-points[j-1,0])*C
+        newPts[p,1] = points[j-1,1]+(points[j,1]-points[j-1,1])*C
+    newPts[npts-1] = points[-1]
+    return(newPts)

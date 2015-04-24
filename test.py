@@ -9,7 +9,8 @@ from sklearn.metrics import accuracy_score
 
 usage = "Usage: $ python test.py stateFilename outdir (testFile.dat | inkmldir lgdir)"
 
-def main(argv=None):
+def main(argv=["RF20_FullDepth.mdl","RF20_FullDepthLGTest","inkml_test","lg_test"]):
+#def main(argv=["RF20_FullDepth.mdl","RF20_FullDepthLGTest","tmpink","tmplg"]):
     if argv is None:
         argv = sys.argv[1:] #dirty trick to make this convenient in the interpreter.
     if (len (argv) < 3 or len (argv) > 4): 
@@ -24,7 +25,7 @@ def main(argv=None):
         else:
              exprs = SymbolData.readInkmlDirectory(argv[2], argv[3])
 
-        
+        print("Loaded inkmls")
         #model, pca = joblib.load(argv[1]) 
         with open(argv[0], 'rb') as f:
             model, pca, keys =  pickle.load(f)
