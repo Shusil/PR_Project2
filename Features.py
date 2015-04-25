@@ -99,12 +99,10 @@ def symbolFeatures(symbol):
     l = RWTHFeat.shape[0]
     for i in range(0,l,4):
         RWTH = getMeanStd(RWTHFeat)
-#        print("RWTH", RWTH)
         f = NP.append(f,RWTH)
-#    boxFeat = getBoxFeatures(I,6)
-#    f = NP.append(f,boxFeat)
+    boxFeat = getBoxFeatures(I,6)
+    f = NP.append(f,boxFeat)
     #the minimum, basic scaling needed for many classifiers to work corectly.
-#    print("F", f)
     f_scaled = preprocessing.scale(f)
     # would have put PCA here, but that doesn't play nice with the way it needs to be used.
     return f_scaled
@@ -132,6 +130,7 @@ def numstrokes(symbol):
 def getStatFeatures(symbol):
     pts = NP.asarray(symbol.points()).T
     f = NP.array([])
+
     if pts.shape[1] > 1:
         cov = NP.cov(pts)
         eig = NP.linalg.eig(cov)
@@ -140,11 +139,12 @@ def getStatFeatures(symbol):
         eigVec = eig[1].T
         eigVecSort = eigVec[ind]
         f = NP.append(f,cov[0])
+        f = NP.append(f,cov[1][1])
         f = NP.append(f,eigVal)
         f = NP.append(f,eigVecSort)
-        f = NP.append(f,cov[1][1])
     else:
         f = NP.zeros((9))
+
     return f
     
 ## FKI Features 
@@ -243,37 +243,38 @@ def getMeanStd(f):
     feat = NP.append(mean,std)
     return(feat)
     
-#def getBoxFeatures(I,w):
-#    l = I.shape[0]
-#    f = NP.array([])
-#    
-#    for i in range(0,l,w):
-#        for j in range(0,l,w):
-#            endI = min(i+w,l)
-#            endJ = min(j+w,l)
-#            patch = I[i:endI,j:endJ]
-#            x,y = NP.nonzero(patch)
-#            pts = NP.array((x,y))
-#            if(pts.shape[1]==0):
-#                f = NP.append(f,NP.zeros((11)))
-#            elif(pts.shape[1]<2):
-#                f = NP.append(f,pts)
-#                f = NP.append(f,NP.zeros((9)))
-#            else:
-##                print(pts.size)
-#                mean = NP.mean(pts,axis=1)
-#                cov = NP.cov(pts)
-#                eig = NP.linalg.eig(cov)
-#                ind = NP.argsort(eig[0])
-#                eigVal = eig[0][ind]
-#                eigVec = eig[1].T
-#                eigVecSort = eigVec[ind]
-#                f = NP.append(f,mean)
-#                f = NP.append(f,cov[0])
-#                f = NP.append(f,cov[1][1])
-#                f = NP.append(f,eigVal)
-#                f = NP.append(f,eigVecSort)
-#    return f
+
+def getBoxFeatures(I,w):
+    l = I.shape[0]
+    f = NP.array([])
+    
+    for i in range(0,l,w):
+        for j in range(0,l,w):
+            endI = min(i+w,l)
+            endJ = min(j+w,l)
+            patch = I[i:endI,j:endJ]
+            x,y = NP.nonzero(patch)
+            pts = NP.array((x,y))
+            if(pts.shape[1]==0):
+                f = NP.append(f,NP.zeros((11)))
+            elif(pts.shape[1]<2):
+                f = NP.append(f,pts)
+                f = NP.append(f,NP.zeros((9)))
+            else:
+#                print(pts.size)
+                mean = NP.mean(pts,axis=1)
+                cov = NP.cov(pts)
+                eig = NP.linalg.eig(cov)
+                ind = NP.argsort(eig[0])
+                eigVal = eig[0][ind]
+                eigVec = eig[1].T
+                eigVecSort = eigVec[ind]
+                f = NP.append(f,mean)
+                f = NP.append(f,cov[0])
+                f = NP.append(f,cov[1][1])
+                f = NP.append(f,eigVal)
+                f = NP.append(f,eigVecSort)
+    return f
     
 
 # sort of based of a paper I read. Not terribly efficient.
