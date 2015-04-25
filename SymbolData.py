@@ -385,9 +385,26 @@ def mergeFromRecog(e):
         mergedSymb = Symbol(strokes, ident='m_')
         clBoth = Classification.classifySymbol(mergedSymb)
         newESymbols = []
+<<<<<<< HEAD
         if max(clBoth[0]) * 2 > max(max(cl1[0]), max(cl2[0])):
             for symbol in range(l-1):
                 if symbol != pair[2] and symbol != pair[2] + 1:
+=======
+#        print(max(clBoth))
+        confS = {}
+        if max(clBoth[0]) * 2 > max(max(cl1[0]), max(cl2[0])):
+            confs[max(clBoth[0])] = [pair, mergedSymb]
+
+        if len(confs.keys()) > 0:
+            maxConf = max(confs.keys())
+            pairToMerge, mergedSymb = confs[maxConf]
+
+            print("MERGING", pairToMerge[2], pairToMerge[2] + 1)
+    #            mergedSymb.plot()
+            for symbol in range(l-1):
+                if symbol != pairToMerge[2] and symbol != pairToMerge[2] + 1:
+                    print("ADDING ORIG SYMBOL", symbol)
+>>>>>>> origin/master
                     newESymbols.append(e.symbols[symbol])
                 elif symbol == x:
                     newESymbols.append(mergedSymb)
