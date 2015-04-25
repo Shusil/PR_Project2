@@ -382,7 +382,6 @@ def readFile(filename, warn=True, train=False):
              root = tree.getroot()
              tracegroups = root.findall('./*/{http://www.w3.org/2003/InkML}traceGroup')
              symbols = list(map((lambda t: readSymbol(root, t)), tracegroups))
-    #         print symbols[0]
              return symbols
          except:
              if warn:
@@ -397,19 +396,12 @@ def fnametolg(filename, lgdir):
 
 def mergeFromCrossings(exp):    
     crossings = getCrossStroke(exp)
-#    print("MERGING")
-#    print(len(crossings), 'crossings', len(exp.symbols), 'symbols')
-#    for c in crossings:
-#        print(c)
-#    crossers = set()
     allSymbols = []
 
     for s in crossings:
         sym = Symbol(s, ident='x_')
         allSymbols.append(sym)
     e = Expression(exp.name, allSymbols, exp.relations)
-#    print(len(allSymbols), len(exp.symbols))
-#    e.symbols[0].plot()
     return e
     
 def mergeFromRecog(e):
@@ -419,18 +411,20 @@ def mergeFromRecog(e):
         potMerge = [e.symbols[x], e.symbols[x+1], x]
         potentials.append(potMerge)
     for pair in potentials:
-        cl1 = Classification.classifySymbol(pair[0])
-        cl2 = Classification.classifySymbol(pair[1])
-#        print(cl1)
+        # local normalized stroke paris for classification
+        s1 = Symbol(pair[0].strokes,norm=True)
+        s2 = Symbol(pair[1].strokes,norm=True)
+        cl1 = Classification.classifySymbol(s1)
+        cl2 = Classification.classifySymbol(s2)
         strokes = []
         for stroke in pair[0].strokes:
             strokes.append(stroke)
         for stroke in pair[1].strokes:
             strokes.append(stroke)
         mergedSymb = Symbol(strokes, ident='m_')
-        clBoth = Classification.classifySymbol(mergedSymb)
+        sm = Symbol(mergedSymb.strokes,norm=True)   # normalized for classification
+        clBoth = Classification.classifySymbol(sm)
         newESymbols = []
-#        print(max(clBoth))
         confs = {}
         if max(clBoth[0]) * 2 > max(max(cl1[0]), max(cl2[0])):
             confs[max(clBoth[0])] = [pair, mergedSymb]
@@ -440,7 +434,6 @@ def mergeFromRecog(e):
             pairToMerge, mergedSymb = confs[maxConf]
 
             print("MERGING", pairToMerge[2], pairToMerge[2] + 1)
-    #            mergedSymb.plot()
             for symbol in range(l-1):
                 if symbol != pairToMerge[2] and symbol != pairToMerge[2] + 1:
                     print("ADDING ORIG SYMBOL", symbol)
@@ -468,8 +461,8 @@ def readInkml(filename, lgdir, warn=False):
         eNew = mergeFromRecog(e)
         e = eNew
 #    e = mergeFromRecog(e)
-    if 'bert' in filename:
-        e.plot()
+#    if 'bert' in filename:
+#        e.plot()
     print("AfterRecog SYMBOLS", len(e.symbols))
 
     return e
