@@ -407,10 +407,13 @@ def mergeFromCrossings(exp):
     
 def mergeFromRecog(e):
     l = len(e.symbols)
-    potentials = []
+    potentials, potentials3 = [], []
     for x in range(l-1):
         potMerge = [e.symbols[x], e.symbols[x+1], x]
         potentials.append(potMerge)
+    for x in range(l-2):
+        potMerge = [e.symbols[x], e.symbols[x+1], e.symbols[x+2], x]
+        potentials3.append(potMerge)
     for pair in potentials:
         # local normalized stroke paris for classification
         p1 = copy.deepcopy(pair[0].strokes)
@@ -434,22 +437,54 @@ def mergeFromRecog(e):
         confs = {}
         if max(clBoth[0]) * 2 > max(max(cl1[0]), max(cl2[0])):
             confs[max(clBoth[0])] = [pair, mergedSymb]
+    for pair in potentials:
+        # local normalized stroke paris for classification
+        p1 = copy.deepcopy(pair[0].strokes)
+        p2 = copy.deepcopy(pair[1].strokes)
+        p3 = copy.deepcopy(pair[2].strokes)
 
-        if len(confs.keys()) > 0:
-            maxConf = max(confs.keys())
-            pairToMerge, mergedSymb = confs[maxConf]
+        s1 = Symbol(p1,norm=True)
+        s2 = Symbol(p2,norm=True)
+        s3 = Symbol(p2,norm=True)
 
-            print("MERGING", pairToMerge[2], pairToMerge[2] + 1)
-            for symbol in range(l-1):
-                if symbol != pairToMerge[2] and symbol != pairToMerge[2] + 1:
-                    print("ADDING ORIG SYMBOL", symbol)
-                    newESymbols.append(e.symbols[symbol])
-                elif symbol == pairToMerge[2]:
-                    newESymbols.append(mergedSymb)
-            if(pairToMerge[2] != (l-2)):
-                newESymbols.append(e.symbols[l-1])
-               
-            return Expression(name=e.name, symbols=newESymbols, relations=e.relations, norm=False)
+        cl1 = Classification.classifySymbol(s1)
+        cl2 = Classification.classifySymbol(s2)
+        cl3 = Classification.classifySymbol(s2)
+
+        strokes = []
+        for stroke in pair[0].strokes:
+            strokes.append(stroke)
+        for stroke in pair[1].strokes:
+            strokes.append(stroke)
+        for stroke in pair[2].strokes:
+            strokes.append(stroke)
+
+        mergedSymb = Symbol(strokes, ident='m_')
+        strokesCopy = copy.deepcopy(strokes)
+        sm = Symbol(strokesCopy, ident='m_', norm=True)   # normalized for classification
+        clBoth = Classification.classifySymbol(sm)
+        newESymbols = []
+        confs = {}
+        if max(clBoth[0]) * 3 > max(max(cl1[0]), max(cl2[0]), max(cl3[0])):
+            confs[max(clBoth[0])] = [pair, mergedSymb]
+    
+
+
+    if len(confs.keys()) > 0:
+        maxConf = max(confs.keys())
+        pairToMerge, mergedSymb = confs[maxConf]
+
+        print("MERGING", pairToMerge[2], pairToMerge[2] + 1)
+        for symbol in range(l-1):
+            if symbol != pairToMerge[2] and symbol != pairToMerge[2] + 1:
+                print("ADDING ORIG SYMBOL", symbol)
+                newESymbols.append(e.symbols[symbol])
+            elif symbol == pairToMerge[2]:
+                newESymbols.append(mergedSymb)
+        if(pairToMerge[2] != (l-2)):
+            newESymbols.append(e.symbols[l-1])
+           
+        return Expression(name=e.name, symbols=newESymbols, relations=e.relations, norm=False)
     return e
     
 # this returns an expression class rather than just a list of symbols.
