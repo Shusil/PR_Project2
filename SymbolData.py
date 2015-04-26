@@ -474,15 +474,30 @@ def mergeFromRecog(e):
         maxConf = max(confs.keys())
         pairToMerge, mergedSymb = confs[maxConf]
 
-        print("MERGING", pairToMerge[2], pairToMerge[2] + 1)
-        for symbol in range(l-1):
-            if symbol != pairToMerge[2] and symbol != pairToMerge[2] + 1:
-                print("ADDING ORIG SYMBOL", symbol)
-                newESymbols.append(e.symbols[symbol])
-            elif symbol == pairToMerge[2]:
-                newESymbols.append(mergedSymb)
-        if(pairToMerge[2] != (l-2)):
-            newESymbols.append(e.symbols[l-1])
+        # print("MERGING", pairToMerge[2], pairToMerge[2] + 1,  pairToMerge[2] + 2)
+        # if len(pairToMerge) == 3:
+        #     oneOrTwo = 2
+        # else:
+        #     oneOrTwo = 1
+        for symbol in range(l):
+            if len(pairToMerge) == 3:
+                if symbol != pairToMerge[2] and symbol != pairToMerge[2] + 1:
+                    print("ADDING ORIG SYMBOL", symbol)
+                    newESymbols.append(e.symbols[symbol])
+                elif symbol == pairToMerge[2]:
+                    newESymbols.append(mergedSymb)
+            elif len(pairToMerge) == 4:
+                if symbol != pairToMerge[2] and symbol != pairToMerge[2] + 1 and symbol != pairToMerge[2] + 2:
+                    print("ADDING ORIG SYMBOL", symbol)
+                    newESymbols.append(e.symbols[symbol])
+                elif symbol == pairToMerge[2]:
+                    newESymbols.append(mergedSymb)  
+        # if oneOrTwo == 1:              
+        #     if(pairToMerge[2] != (l-2)):
+        #         newESymbols.append(e.symbols[l-1])
+        # else:
+        #     if(pairToMerge[3] != (l-3)):
+        #         newESymbols.append(e.symbols[l-2])
            
         return Expression(name=e.name, symbols=newESymbols, relations=e.relations, norm=False)
     return e
