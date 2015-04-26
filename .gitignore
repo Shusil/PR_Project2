@@ -9,3 +9,7 @@ trainLg
 *.mdl
 RF20_FullDepthLGTest
 RF20_FullDepthBoxFeat0
+RF20_FullDepthBoxFeat
+inkmlTest
+lgTest
+
