@@ -16,6 +16,7 @@ from scipy.spatial import distance
 import Classification
 import itertools
 from functools import reduce
+import copy
 
 
 """ Contains representations for the relevant data,
@@ -412,8 +413,12 @@ def mergeFromRecog(e):
         potentials.append(potMerge)
     for pair in potentials:
         # local normalized stroke paris for classification
-        s1 = Symbol(pair[0].strokes,norm=True)
-        s2 = Symbol(pair[1].strokes,norm=True)
+        p1 = copy.deepcopy(pair[0].strokes)
+        p2 = copy.deepcopy(pair[1].strokes)
+            
+        s1 = Symbol(p1,norm=True)
+        s2 = Symbol(p2,norm=True)
+
         cl1 = Classification.classifySymbol(s1)
         cl2 = Classification.classifySymbol(s2)
         strokes = []
@@ -422,7 +427,8 @@ def mergeFromRecog(e):
         for stroke in pair[1].strokes:
             strokes.append(stroke)
         mergedSymb = Symbol(strokes, ident='m_')
-        sm = Symbol(mergedSymb.strokes,norm=True)   # normalized for classification
+        strokesCopy = copy.deepcopy(strokes)
+        sm = Symbol(strokesCopy, ident='m_', norm=True)   # normalized for classification
         clBoth = Classification.classifySymbol(sm)
         newESymbols = []
         confs = {}
@@ -438,8 +444,11 @@ def mergeFromRecog(e):
                 if symbol != pairToMerge[2] and symbol != pairToMerge[2] + 1:
                     print("ADDING ORIG SYMBOL", symbol)
                     newESymbols.append(e.symbols[symbol])
-                elif symbol == x:
+                elif symbol == pairToMerge[2]:
                     newESymbols.append(mergedSymb)
+            if(pairToMerge[2] != (l-2)):
+                newESymbols.append(e.symbols[l-1])
+               
             return Expression(name=e.name, symbols=newESymbols, relations=e.relations, norm=False)
     return e
     
