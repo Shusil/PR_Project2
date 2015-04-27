@@ -414,6 +414,8 @@ def mergeFromRecog(e):
     for x in range(l-2):
         potMerge = [e.symbols[x], e.symbols[x+1], e.symbols[x+2], x]
         potentials3.append(potMerge)
+
+    confs = {}
     for pair in potentials:
         # local normalized stroke paris for classification
         p1 = copy.deepcopy(pair[0].strokes)
@@ -434,10 +436,11 @@ def mergeFromRecog(e):
         sm = Symbol(strokesCopy, ident='m_', norm=True)   # normalized for classification
         clBoth = Classification.classifySymbol(sm)
         newESymbols = []
-        confs = {}
-        if max(clBoth[0]) * 2 > max(max(cl1[0]), max(cl2[0])):
+#        confs = {}
+        if max(clBoth[0]) * 2 >= max(max(cl1[0]), max(cl2[0])):
             confs[max(clBoth[0])] = [pair, mergedSymb]
-    for pair in potentials:
+
+    for pair in potentials3:
         # local normalized stroke paris for classification
         p1 = copy.deepcopy(pair[0].strokes)
         p2 = copy.deepcopy(pair[1].strokes)
@@ -445,11 +448,11 @@ def mergeFromRecog(e):
 
         s1 = Symbol(p1,norm=True)
         s2 = Symbol(p2,norm=True)
-        s3 = Symbol(p2,norm=True)
+        s3 = Symbol(p3,norm=True)
 
         cl1 = Classification.classifySymbol(s1)
         cl2 = Classification.classifySymbol(s2)
-        cl3 = Classification.classifySymbol(s2)
+        cl3 = Classification.classifySymbol(s3)
 
         strokes = []
         for stroke in pair[0].strokes:
@@ -464,8 +467,8 @@ def mergeFromRecog(e):
         sm = Symbol(strokesCopy, ident='m_', norm=True)   # normalized for classification
         clBoth = Classification.classifySymbol(sm)
         newESymbols = []
-        confs = {}
-        if max(clBoth[0]) * 3 > max(max(cl1[0]), max(cl2[0]), max(cl3[0])):
+#        confs = {}
+        if max(clBoth[0]) * 3 >= max(max(cl1[0]), max(cl2[0]), max(cl3[0])):
             confs[max(clBoth[0])] = [pair, mergedSymb]
     
 
@@ -481,16 +484,16 @@ def mergeFromRecog(e):
         #     oneOrTwo = 1
         for symbol in range(l):
             if len(pairToMerge) == 3:
-                if symbol != pairToMerge[2] and symbol != pairToMerge[2] + 1:
+                if (symbol != pairToMerge[2]) and (symbol != pairToMerge[2] + 1):
                     print("ADDING ORIG SYMBOL", symbol)
                     newESymbols.append(e.symbols[symbol])
                 elif symbol == pairToMerge[2]:
                     newESymbols.append(mergedSymb)
             elif len(pairToMerge) == 4:
-                if symbol != pairToMerge[2] and symbol != pairToMerge[2] + 1 and symbol != pairToMerge[2] + 2:
+                if (symbol != pairToMerge[3]) and (symbol != pairToMerge[3] + 1) and (symbol != pairToMerge[3] + 2):
                     print("ADDING ORIG SYMBOL", symbol)
                     newESymbols.append(e.symbols[symbol])
-                elif symbol == pairToMerge[2]:
+                elif symbol == pairToMerge[3]:
                     newESymbols.append(mergedSymb)  
         # if oneOrTwo == 1:              
         #     if(pairToMerge[2] != (l-2)):
@@ -515,8 +518,12 @@ def readInkml(filename, lgdir, warn=False):
     print("PREMERGE SYMBOLS", len(e.symbols))
     e = mergeFromCrossings(e)
     print("AfterCross SYMBOLS", len(e.symbols))
+#    eNew = mergeFromRecog(e)
+#    while(len(eNew.symbols) != len(e.symbols)):
+#        e = copy.deepcopy(eNew)
+#        eNew = mergeFromRecog(e)
     eNew = None
-    while(eNew != e):
+    while(eNew!=e):
         eNew = mergeFromRecog(e)
         e = eNew
 #    e = mergeFromRecog(e)

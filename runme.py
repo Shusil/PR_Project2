@@ -19,14 +19,14 @@ import train
 #symbols = SymbolData.normalize(symbols,scale)
 
 
-exprs = SymbolData.readInkmlDirectory('inkmlTest','lgTest')
-for expr in exprs:
-#    plt.figure()
-    expr.plot()
-    wait = input("press enter")
+exprs = SymbolData.readInkmlDirectory('inkml_test','lg_test')
+#for expr in exprs:
+##    plt.figure()
+#    expr.plot()
+#    wait = input("press enter")
 #crossStrokes = getCrossStroke(expr)
 
-#expr = SymbolData.readInkml('inkml_test/65_Frank.inkml','lg_test')
+expr = SymbolData.readInkml('inkml_test/70_hirata.inkml','lg_test')
 #plt.figure()
 #expr.plot()
 

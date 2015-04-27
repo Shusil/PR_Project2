@@ -10,6 +10,9 @@ trainLg
 RF20_FullDepthLGTest
 RF20_FullDepthBoxFeat0
 RF20_FullDepthBoxFeat
+RF20_FullDepthBoxFeat1
+RF20_FullDepthBoxFeatEquals
+RF20_FullDepthBoxFeatTrainEquals
 inkmlTest
 lgTest
 
