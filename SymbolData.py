@@ -424,8 +424,8 @@ def mergeFromRecog(e):
         s1 = Symbol(p1,norm=True)
         s2 = Symbol(p2,norm=True)
 
-        cl1 = Classification.classifySymbol(s1)
-        cl2 = Classification.classifySymbol(s2)
+        cl1, symbolCl1 = Classification.classifySymbol(s1)
+        cl2, symbolCl2 = Classification.classifySymbol(s2)
         strokes = []
         for stroke in pair[0].strokes:
             strokes.append(stroke)
@@ -434,11 +434,12 @@ def mergeFromRecog(e):
         mergedSymb = Symbol(strokes, ident='m_')
         strokesCopy = copy.deepcopy(strokes)
         sm = Symbol(strokesCopy, ident='m_', norm=True)   # normalized for classification
-        clBoth = Classification.classifySymbol(sm)
+        clBoth, symbolBoth = Classification.classifySymbol(sm)
         newESymbols = []
 #        confs = {}
         if max(clBoth[0]) * 2 >= max(max(cl1[0]), max(cl2[0])):
-            confs[max(clBoth[0])] = [pair, mergedSymb]
+            if (symbolCl1 != '.' and symbolCl2 != '.') or symbolBoth == 'i':
+                confs[max(clBoth[0])] = [pair, mergedSymb]
 
     for pair in potentials3:
         # local normalized stroke paris for classification
@@ -446,13 +447,13 @@ def mergeFromRecog(e):
         p2 = copy.deepcopy(pair[1].strokes)
         p3 = copy.deepcopy(pair[2].strokes)
 
-        s1 = Symbol(p1,norm=True)
+        s1= Symbol(p1,norm=True)
         s2 = Symbol(p2,norm=True)
         s3 = Symbol(p3,norm=True)
 
-        cl1 = Classification.classifySymbol(s1)
-        cl2 = Classification.classifySymbol(s2)
-        cl3 = Classification.classifySymbol(s3)
+        cl1, symbolCl1 = Classification.classifySymbol(s1)
+        cl2, symbolCl2 = Classification.classifySymbol(s2)
+        cl3, symbolCl3 = Classification.classifySymbol(s3)
 
         strokes = []
         for stroke in pair[0].strokes:
@@ -465,11 +466,13 @@ def mergeFromRecog(e):
         mergedSymb = Symbol(strokes, ident='m_')
         strokesCopy = copy.deepcopy(strokes)
         sm = Symbol(strokesCopy, ident='m_', norm=True)   # normalized for classification
-        clBoth = Classification.classifySymbol(sm)
+        clBoth, symbolBoth = Classification.classifySymbol(sm)
         newESymbols = []
 #        confs = {}
         if max(clBoth[0]) * 3 >= max(max(cl1[0]), max(cl2[0]), max(cl3[0])):
-            confs[max(clBoth[0])] = [pair, mergedSymb]
+            if (symbolCl1 != '.' and symbolCl2 != '.' and symbolCl3 != '.') or symbolBoth == 'i':
+            
+                confs[max(clBoth[0])] = [pair, mergedSymb]
     
 
 

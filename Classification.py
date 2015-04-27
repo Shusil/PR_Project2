@@ -84,7 +84,7 @@ def classifyExpressions(expressions, keys, model, pca, renormalize=True, showAcc
 #        print( "Accuracy on testing set : ", accuracy_score(NP.concatenate(cors), NP.concatenate(preds)))
     return (cors, preds)
 
-with open('RF20_FullDepthBoxFeat.mdl', 'rb') as f:
+with open('../../../../..//Desktop/rf.mdl', 'rb') as f:
     model, pca, keys =  pickle.load(f)
 def classifySymbol(symb, keys=keys, model=model, pca=pca, renormalize=True):
     import copy
