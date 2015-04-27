@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score
 from functools import reduce
 import pickle
+import copy
 
 #1-NN classifier. Pretends to be a sklearn model, so we can use the same code.
 class OneNN:
@@ -86,18 +87,25 @@ def classifyExpressions(expressions, keys, model, pca, renormalize=True, showAcc
 
 with open('../../../../..//Desktop/rf.mdl', 'rb') as f:
     model, pca, keys =  pickle.load(f)
+cache = {}
 def classifySymbol(symb, keys=keys, model=model, pca=pca, renormalize=True):
-    import copy
-    symb = [copy.deepcopy(symb)]
+#    orig = copy.deepcopy(symb) 
+    global cache
+#    print(cache)
+    if str(symb) in cache:
+#        print('cache hit')
+        return cache[str(symb)]
+    symbl = [copy.deepcopy(symb)]
     if renormalize:
-        symb = SymbolData.normalize(symb, 29)
-    f = Features.features(symb)
+        symbl = SymbolData.normalize(symbl, 29)
+    f = Features.features(symbl)
     
     if (pca != None):
         f = pca.transform(f)
     pred = model.predict_proba(f)
     predChar = model.predict(f)
     predChar = keys[predChar]
+    cache[str(symb)] = [pred, predChar]
     return pred, predChar
     
     
