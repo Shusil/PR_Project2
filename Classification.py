@@ -96,7 +96,9 @@ def classifySymbol(symb, keys=keys, model=model, pca=pca, renormalize=True):
     if (pca != None):
         f = pca.transform(f)
     pred = model.predict_proba(f)
-    return pred
+    predChar = model.predict(f)
+    predChar = keys[predChar]
+    return pred, predChar
     
     
 def classifyExpression(expression, keys, model, pca, renormalize=True):
