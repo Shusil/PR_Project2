@@ -439,6 +439,7 @@ def mergeFromRecog(e):
 #        confs = {}
         if max(clBoth[0]) * 2 >= max(max(cl1[0]), max(cl2[0])):
             if (symbolCl1 != '.' and symbolCl2 != '.') or symbolBoth == 'i':
+#                print("\n\n\n\n\n\nDOT\n\n\n\n\n\n\n")                
                 confs[max(clBoth[0])] = [pair, mergedSymb]
 
     for pair in potentials3:
