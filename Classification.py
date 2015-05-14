@@ -55,7 +55,7 @@ def train(model, training, keys, pca_num=None):
     return (model, pca)
 
 
-def classifyExpressions(expressions, keys, model, pca, renormalize=True, showAcc = False):
+def classifyExpressions(expressions, keys, model, pca, out, renormalize=True, showAcc = False):
     #this sort of does double duty, since it is both classifying the symbols
     # with side effects and returnning stuff to evaluate the results.
     # Bad style. Sorry.
@@ -68,6 +68,7 @@ def classifyExpressions(expressions, keys, model, pca, renormalize=True, showAcc
 #    s = showAcc
     
     for expr in expressions:
+        print(expr)
         correct, predicted =  classifyExpression(expr, keys, model, pca, renormalize)
         #assert (len(correct) == len(predicted))
 #        if s:
@@ -78,7 +79,12 @@ def classifyExpressions(expressions, keys, model, pca, renormalize=True, showAcc
         
         preds = preds + [predicted]
         print(i, "/",tot)
+        f = (lambda p: keys[p])
+            #    expr.classes = map (f, preds[i])
+
+        expr.writeLG(out ,clss =  map (f, preds[i]) )
         i+=1
+
         #print (correct, " -> ", predicted)        
 #    if s :
 #        print (cors)
