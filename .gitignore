@@ -13,6 +13,9 @@ RF20_FullDepthBoxFeat
 RF20_FullDepthBoxFeat1
 RF20_FullDepthBoxFeatEquals
 RF20_FullDepthBoxFeatTrainEquals
+RF20_FullDepthBoxFeatTrainNew
+RF20_FullDepthBoxFeatBugFixed
+RF20_FullDepthBoxFeatTrainBugFixed
 inkmlTest
 lgTest
 

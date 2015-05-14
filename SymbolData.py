@@ -753,21 +753,37 @@ def unpickleSymbols(filename):
         return pickle.load(f)
 
 # Normalize the data such that x or y -> (0,99) and maintain the aspect ratio
-def normalize(symbols,scale):
+#def normalize(symbols,scale):
+#    k=0
+#    for symbol in symbols:
+#        xmin = symbol.xmin()
+#        ymin = symbol.ymin()
+#        for i in range(len(symbol.strokes)):
+#            for j in range(len(symbol.strokes[i].xs)):
+#                symbol.strokes[i].xs[j] = (symbol.strokes[i].xs[j]-xmin)*scale/2
+#                symbol.strokes[i].ys[j] = (symbol.strokes[i].ys[j]-ymin)*scale/2
+#        symbols[k] = symbol
+#        k+=1    
+#    return(symbols)
+
+
+def normalize(symbolsOrig,scale):
     k=0
+    symbols = copy.deepcopy(symbolsOrig)
     for symbol in symbols:
         xmin = symbol.xmin()
         ymin = symbol.ymin()
+        xmax = symbol.xmax()
+        ymax = symbol.ymax()
         for i in range(len(symbol.strokes)):
             for j in range(len(symbol.strokes[i].xs)):
-                symbol.strokes[i].xs[j] = (symbol.strokes[i].xs[j]-xmin)*scale/2
-                symbol.strokes[i].ys[j] = (symbol.strokes[i].ys[j]-ymin)*scale/2
+                rangeSym = max((ymax-ymin),(xmax-xmin))
+                if(rangeSym!=0):
+                    symbol.strokes[i].xs[j] = (symbol.strokes[i].xs[j]-xmin)*scale/rangeSym
+                    symbol.strokes[i].ys[j] = (symbol.strokes[i].ys[j]-ymin)*scale/rangeSym
         symbols[k] = symbol
         k+=1    
     return(symbols)
-
-
-
 
 
 

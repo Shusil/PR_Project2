@@ -26,7 +26,7 @@ exprs = SymbolData.readInkmlDirectory('inkml_test','lg_test')
 #    wait = input("press enter")
 #crossStrokes = getCrossStroke(expr)
 
-expr = SymbolData.readInkml('inkml_test/70_hirata.inkml','lg_test')
+#expr = SymbolData.readInkml('inkml_test/70_hirata.inkml','lg_test')
 #plt.figure()
 #expr.plot()
 
