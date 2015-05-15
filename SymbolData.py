@@ -291,8 +291,8 @@ def readStroke(root, strokeNum):
     strokeElem = root.find("./{http://www.w3.org/2003/InkML}trace[@id='" + repr(strokeNum) + "']")
     strokeText = strokeElem.text.strip()
     pointStrings = strokeText.split(',')
-    points = list(map( (lambda s: [float(n) for n in (s.strip()).split(' ')[:2]]), pointStrings))
-    return Stroke(points, flip=True, ident=strokeNum, smooth=True, resample=True, nPts=30)
+    points = list(map( (lambda s: [float(n) for n in (s.strip()).split(' ')]), pointStrings))
+    return Stroke(points, flip=True, ident=strokeNum, smooth=True)#, resample=True, nPts=20)
 
 
 def readStrokeNew(root, strokeNum):
@@ -324,9 +324,7 @@ def readSymbol(root, tracegroup):
     strokeElems = tracegroup.findall('.//{http://www.w3.org/2003/InkML}traceView')
     assert( len(strokeElems) != 0)
     strokeNums = list(map( (lambda e: int(e.attrib['traceDataRef'])), strokeElems)) #ensure that all these are really ints if we have trouble.
-
     strokes = list(map( (lambda n: readStroke(root, n)), strokeNums))
-
     if (truthAnnot == None):
         truthText = None
     else:
@@ -374,21 +372,20 @@ def readFile(filename, warn=True, train=False):
         except:
             print("Unparsable file")
             if warn:
-                print("warning: unparsable file.")
+                print("warning: unparsable file -- ",filename)
             return []
     else:
-         try:
-             #print (filename)
-             tree = ET.parse(filename)
-             root = tree.getroot()
-             tracegroups = root.findall('./*/{http://www.w3.org/2003/InkML}traceGroup')
-             symbols = list(map((lambda t: readSymbol(root, t)), tracegroups))
-             return symbols
-         except:
-             if warn:
-                 print("warning: unparsable file.")
-             return []
-
+        try:
+            #print (filename)
+            tree = ET.parse(filename)
+            root = tree.getroot()
+            tracegroups = root.findall('./*/{http://www.w3.org/2003/InkML}traceGroup')
+            symbols = list(map((lambda t: readSymbol(root, t)), tracegroups))
+            return symbols
+        except:
+            if warn:
+                print("warning: unparsable file -- ",filename)
+            return []
 
 def fnametolg(filename, lgdir):
     fdir, fname = os.path.split(filename)
@@ -510,8 +507,8 @@ def mergeFromRecog(e):
     return e
     
 # this returns an expression class rather than just a list of symbols.
-def readInkml(filename, lgdir, warn=False):
-    symbols = readFile(filename, warn, False) #trainis the last param
+def readInkml(filename, lgdir, warn=False, train=False):
+    symbols = readFile(filename, warn, train) #trainis the last param
     rdir, filenm = os.path.split(filename)
     name, ext = os.path.splitext(filenm)
     lgfile = fnametolg(filename, lgdir)
@@ -519,21 +516,23 @@ def readInkml(filename, lgdir, warn=False):
         tmp = Stroke([[0,0],[1,1]])
         symbols = [Symbol([tmp], ident='y_')]
     e = Expression(name, symbols, readLG(lgfile), norm=True)
-    print("PREMERGE SYMBOLS", len(e.symbols))
-    e = mergeFromCrossings(e)
-    print("AfterCross SYMBOLS", len(e.symbols))
-#    eNew = mergeFromRecog(e)
-#    while(len(eNew.symbols) != len(e.symbols)):
-#        e = copy.deepcopy(eNew)
-#        eNew = mergeFromRecog(e)
-    eNew = None
-    while(eNew!=e):
-        eNew = mergeFromRecog(e)
-        e = eNew
+
+    if not train:
+        print("PREMERGE SYMBOLS", len(e.symbols))
+        e = mergeFromCrossings(e)
+        print("AfterCross SYMBOLS", len(e.symbols))
+#       eNew = mergeFromRecog(e)
+#       while(len(eNew.symbols) != len(e.symbols)):
+#           e = copy.deepcopy(eNew)
+#           eNew = mergeFromRecog(e)
+        eNew = None
+        while(eNew!=e):
+            eNew = mergeFromRecog(e)
+            e = eNew
 #    e = mergeFromRecog(e)
 #    if 'bert' in filename:
 #        e.plot()
-    print("AfterRecog SYMBOLS", len(e.symbols))
+        print("AfterRecog SYMBOLS", len(e.symbols))
 
     return e
     
@@ -571,9 +570,9 @@ def readDirectory(filename, warn=False):
     fnames = filenames(filename)
     return reduce( (lambda a, b : a + b), (list(map ((lambda f: readFile(f, warn)), fnames))), [])
 
-def readInkmlDirectory(filename, lgdir, warn=False):
+def readInkmlDirectory(filename, lgdir, warn=False, train=False):
     fnames = filenames(filename)
-    return list(map((lambda f: readInkml(f, lgdir, warn)), fnames))
+    return list(map((lambda f: readInkml(f, lgdir, warn, train)), fnames))
 
 def allSymbols(inkmls):
     return reduce( (lambda a, b: a + b), (list(map ((lambda i: i.symbols), inkmls))))
@@ -787,6 +786,23 @@ def normalize(symbolsOrig,scale):
     return(symbols)
 
 
+def normalizeExprs(exprsOrig,scale):
+    k=0
+    exprs = copy.deepcopy(exprsOrig)
+    for expr in exprs:
+        xmin = expr.xmin()
+        xmax = expr.xmax()
+        ymin = expr.ymin()
+        ymax = expr.ymax()
+        for i in range(len(expr.strokes)):
+            for j in range(len(expr.strokes[i].xs)):
+                rangeExp = max((ymax-ymin),(xmax-xmin))
+                if(rangeExp!=0):
+                    expr.strokes[i].xs[j] = (expr.strokes[i].xs[j]-xmin)*scale/rangeExp
+                    expr.strokes[i].ys[j] = (expr.strokes[i].ys[j]-ymin)*scale/rangeExp
+        exprs[k] = expr
+        k = k+1
+    return(exprs)
 
 
 

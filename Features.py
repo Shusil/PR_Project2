@@ -2,7 +2,9 @@ import numpy as NP
 #import SymbolData
 from skimage.morphology import binary_closing, square
 from skimage.filter import rank
-#from skimage.transform import rescale
+from skimage.filter import gaussian_filter
+from skimage.draw import line
+from skimage.transform import resize
 from sklearn import preprocessing
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
@@ -68,10 +70,33 @@ def getImg(symbol):
     img[img<0.5] = 0
     return(img)
 
+def getImgExpr(expr):
+    I = NP.zeros(((round(expr.ymax())+1),(round(expr.xmax())+1)),dtype=NP.uint8)
+    for stroke in expr.strokes:
+        for j in range(len(stroke.xs)-1):
+            rr,cc = line(round(stroke.ys[j]),round(stroke.xs[j]),round(stroke.ys[j+1]),round(stroke.xs[j+1]))
+            I[rr,cc] = 255
+    img = resize(I,(100,200))
+    img = rank.mean(img, selem=square(1))
+    img = binary_closing(img,selem=square(1))
+    if(img.max()>0):
+        img = img/img.max()
+#    img[img>=0.5] = 1
+#    img[img<0.5] = 0
+    img = gaussian_filter(img,sigma=4,mode='reflect')
+    return(img)
+    
 # Show image for the symbol
 def showImg(symbol):
     plt.figure()
     I = NP.flipud(getImg(symbol))
+    plt.imshow(I)
+    plt.gray()
+    plt.show()
+
+def showImgExpr(expr):
+    plt.figure()
+    I = NP.flipud(getImgExpr(expr))
     plt.imshow(I)
     plt.gray()
     plt.show()
@@ -130,7 +155,7 @@ def numstrokes(symbol):
 def getStatFeatures(symbol):
     pts = NP.asarray(symbol.points()).T
     f = NP.array([])
-
+    
     if pts.shape[1] > 1:
         cov = NP.cov(pts)
         eig = NP.linalg.eig(cov)
@@ -144,7 +169,7 @@ def getStatFeatures(symbol):
         f = NP.append(f,eigVecSort)
     else:
         f = NP.zeros((9))
-
+    
     return f
     
 ## FKI Features 
@@ -275,7 +300,6 @@ def getBoxFeatures(I,w):
                 f = NP.append(f,eigVal)
                 f = NP.append(f,eigVecSort)
     return f
-    
 
 # sort of based of a paper I read. Not terribly efficient.
 # Needs some work, but is in fact a useful set of features.
