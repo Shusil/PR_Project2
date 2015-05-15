@@ -521,6 +521,7 @@ def parse(e):
     e.relations = relationships
     return e
 # this returns an expression class rather than just a list of symbols.
+
 def readInkml(filename, lgdir, warn=False, train=False):
     symbols = readFile(filename, warn, train) #trainis the last param
     rdir, filenm = os.path.split(filename)
@@ -530,7 +531,6 @@ def readInkml(filename, lgdir, warn=False, train=False):
         tmp = Stroke([[0,0],[1,1]])
         symbols = [Symbol([tmp], ident='y_')]
     e = Expression(name, symbols, readLG(lgfile), norm=True)
-<<<<<<< HEAD
 
     if not train:
         print("PREMERGE SYMBOLS", len(e.symbols))
@@ -544,20 +544,14 @@ def readInkml(filename, lgdir, warn=False, train=False):
         while(eNew!=e):
             eNew = mergeFromRecog(e)
             e = eNew
-=======
-    print("PREMERGE SYMBOLS", len(e.symbols))
-    e = mergeFromCrossings(e)
-    print("AfterCross SYMBOLS", len(e.symbols))
-    e = parse(e)
+#        print("PREMERGE SYMBOLS", len(e.symbols))
+#        e = mergeFromCrossings(e)
+#        print("AfterCross SYMBOLS", len(e.symbols))
+        e = parse(e)
 #    eNew = mergeFromRecog(e)
 #    while(len(eNew.symbols) != len(e.symbols)):
 #        e = copy.deepcopy(eNew)
 #        eNew = mergeFromRecog(e)
-    eNew = None
-    while(eNew!=e):
-        eNew = mergeFromRecog(e)
-        e = eNew
->>>>>>> origin/master
 #    e = mergeFromRecog(e)
 #    if 'bert' in filename:
 #        e.plot()
