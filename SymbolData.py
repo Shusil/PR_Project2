@@ -181,6 +181,7 @@ class Expression:
 #            print(s.strokes)
 #        print(self.strokes)
         self.relations = relations
+        print(relations)
         if norm:
             self.normalize()
         self.classes = []
@@ -270,7 +271,7 @@ class Expression:
            # print (self.i)
             self.symblines.append(symbol.lgline(self.clss[self.i]))
             self.i = self.i + 1
-
+        
         with (open (self.filename, 'w')) as f:
             
             for line in self.symblines:
@@ -342,13 +343,15 @@ def readSymbol(root, tracegroup):
     
 def constructTraceGroupsFromSymbols(root, traces):
     symbols = []
+    count = 0
     for trace in traces:
         sID = trace.attrib['id']
         # print 'reading'
         s = readStrokeNew(root, sID)
         # print 'read'
         # print s
-        s = Symbol([s], ident='x_')
+        s = Symbol([s], ident='x'+str(count)+'_')
+        count += 1
         symbols.append(s)
 
     # print 'here'
@@ -398,9 +401,10 @@ def fnametolg(filename, lgdir):
 def mergeFromCrossings(exp):    
     crossings = getCrossStroke(exp)
     allSymbols = []
-
+    count = 0
     for s in crossings:
-        sym = Symbol(s, ident='x_')
+        sym = Symbol(s, ident='x'+str(count)+'_')
+        count += 1
         allSymbols.append(sym)
     e = Expression(exp.name, allSymbols, exp.relations)
     return e
@@ -508,7 +512,17 @@ def mergeFromRecog(e):
            
         return Expression(name=e.name, symbols=newESymbols, relations=e.relations, norm=False)
     return e
-    
+
+def classifyRelationship(s1, s2):
+    return "Right"
+
+def parse(e):
+    relationships = []
+    for index, symbol in enumerate(e.symbols[:-1]):
+        rel = classifyRelationship(symbol, e.symbols[index + 1])
+        relationships.append("EO, " + symbol.ident + ", " + e.symbols[index + 1].ident + ", " + rel + ", 1.0\n")
+    e.relations = relationships
+    return e
 # this returns an expression class rather than just a list of symbols.
 def readInkml(filename, lgdir, warn=False):
     symbols = readFile(filename, warn, False) #trainis the last param
@@ -522,6 +536,7 @@ def readInkml(filename, lgdir, warn=False):
     print("PREMERGE SYMBOLS", len(e.symbols))
     e = mergeFromCrossings(e)
     print("AfterCross SYMBOLS", len(e.symbols))
+    e = parse(e)
 #    eNew = mergeFromRecog(e)
 #    while(len(eNew.symbols) != len(e.symbols)):
 #        e = copy.deepcopy(eNew)

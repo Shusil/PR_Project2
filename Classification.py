@@ -91,7 +91,7 @@ def classifyExpressions(expressions, keys, model, pca, out, renormalize=True, sh
 #        print( "Accuracy on testing set : ", accuracy_score(NP.concatenate(cors), NP.concatenate(preds)))
     return (cors, preds)
 
-with open('RF20_FullDepthBoxFeat.mdl', 'rb') as f:
+with open('../../../../..//Desktop/rf.mdl', 'rb') as f:
     model, pca, keys =  pickle.load(f)
 cache = {}
 def classifySymbol(symb, keys=keys, model=model, pca=pca, renormalize=True):
