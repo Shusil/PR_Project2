@@ -10,7 +10,10 @@ import glob
 
 usage = "Usage: $ python test.py stateFilename outdir (testFile.dat | inkmldir lgdir)"
 
-def main(argv=["RF20_FullDepthBoxFeat.mdl","RF20_FullDepthBoxFeatBugFixed","test","testLg"]):
+#def main(argv=["RF20_FullDepthBoxFeat.mdl","RF20_FullDepthBoxFeatBugFixed","test","testLg"]):
+#def main(argv=["../../../../..//Desktop/rf.mdl","out","test","testLg"]):
+#def main(argv=["RF20_FullDepthBoxFeat.mdl","RF20_FullDepthBoxFeatTrainEquals","train","trainLg"]):
+def main(argv=["../../../../..//Desktop/rf.mdl","outSmall","test1","testLg1"]):
 #def main(argv=["RF20_FullDepth.mdl","RF20_FullDepthLGTest","tmpink","tmplg"]):
     if argv is None:
         argv = sys.argv[1:] #dirty trick to make this convenient in the interpreter.
