@@ -84,6 +84,8 @@ def getImgExpr(expr):
 #    img[img>=0.5] = 1
 #    img[img<0.5] = 0
     img = gaussian_filter(img,sigma=4,mode='reflect')
+    if(img.max()>0):
+        img = img/img.max()
     return(img)
     
 # Show image for the symbol

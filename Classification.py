@@ -93,6 +93,8 @@ def classifyExpressions(expressions, keys, model, pca, out, renormalize=True, sh
 
 with open('RF20_FullDepthBoxFeat.mdl', 'rb') as f:
     model, pca, keys =  pickle.load(f)
+with open('trainImgs.mdl', 'rb') as f:
+    trainDatas =  pickle.load(f)
 cache = {}
 def classifySymbol(symb, keys=keys, model=model, pca=pca, renormalize=True):
 #    orig = copy.deepcopy(symb) 
@@ -131,13 +133,63 @@ def classifyExpression(expression, keys, model, pca, renormalize=True):
     expression.classes = map (f, pred)
     return (NP.array(SymbolData.classNumbers(symbs, keys)), pred)
 
-"""
 
+def getMatchingExpression(testExpr):
+    matchExprns = []
+    for trainData in trainDatas:
+        if(trainData[2]==len(testExpr.symbols)):
+            matchExprns.append(trainData)
+    
+    #for trainData in trainDatas:
+    scoreSCC = NP.zeros((len(matchExprns)))
+#    scoreMI = NP.zeros((len(matchExprns)))
+    k = 0
+    #testImg = Features.getImgExpr(testExpr)
+    for exprList in matchExprns:
+        scoreSCC[k] = scc(Features.getImgExpr(testExpr),exprList[1])
+    #    scoreMI[k] = MI(testData[1],exprList[1])
+        k+=1
+    indSCC = NP.argsort(scoreSCC).astype(int)
+    scoreSCC = scoreSCC[indSCC]
+    scoreSCC = scoreSCC/scoreSCC[-1]
+    
+#    indMI = NP.argsort(scoreMI).astype(int)
+#    scoreMI = scoreMI[indMI]
+#    scoreMI = scoreMI/scoreMI[-1]
+    
+    matchExprSortSCC = []
+    for i in indSCC:
+        matchExprSortSCC.append(matchExprns[i])
+    
+    return(matchExprSortSCC[-1])
 
-symbols = SymbolData.unpickleSymbols("train.dat")
-symbols = SymbolData.normalize(symbols,99)
+def scc(I1,I2):
+    I1 = NP.rint(I1/I1.max()*255).astype('uint8')
+    I2 = NP.rint(I2/I2.max()*255).astype('uint8')
+    X = NP.reshape(I1,(I1.size))
+    Y = NP.reshape(I2,(I2.size))
+    X_ctr = X-NP.mean(X)
+    Y_ctr = Y-NP.mean(Y)
+    varX = NP.sum(X_ctr.T*X_ctr)
+    varY = NP.sum(Y_ctr.T*Y_ctr)
+    covXY = NP.sum(X_ctr.T*Y_ctr)
+    sqcc = covXY**2/(varX*varY)
+    return sqcc
+    
+def MI(I1,I2):
+    I1 = NP.rint(I1/I1.max()*255).astype('uint8')
+    I2 = NP.rint(I2/I2.max()*255).astype('uint8')
+    mat12 = NP.zeros((256,256))
+    for i in range(I1.shape[0]):
+        for j in range(I1.shape[1]):
+            mat12[I1[i,j],I2[i,j]] += 1
+    mat12 = mat12/NP.sum(mat12)
+    I1_marg = NP.sum(mat12,axis=1)
+    I2_marg = NP.sum(mat12,axis=0)
+    H1 = -NP.sum(NP.multiply(I1_marg , NP.log2(I1_marg + (I1_marg==0))))
+    H2 = -NP.sum(NP.multiply(I2_marg , NP.log2(I2_marg + (I2_marg==0))))
+    mat12 = NP.reshape(mat12,(mat12.size))
+    H12 = -NP.sum(NP.multiply(mat12, NP.log2(mat12 + (mat12==0))))
+    mi = H1+H2-H12    
+    return(mi)
 
-Features.showImg(symbols[3])
-
-f = Features.features(symbols[0:2])
- """

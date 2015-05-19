@@ -182,7 +182,7 @@ class Expression:
 #            print(s.strokes)
 #        print(self.strokes)
         self.relations = relations
-        print(relations)
+#        print(relations)
         if norm:
             self.normalize()
         self.classes = []
@@ -515,11 +515,14 @@ def classifyRelationship(s1, s2):
     return "Right"
 
 def parse(e):
-    relationships = []
-    for index, symbol in enumerate(e.symbols[:-1]):
-        rel = classifyRelationship(symbol, e.symbols[index + 1])
-        relationships.append("EO, " + symbol.ident + ", " + e.symbols[index + 1].ident + ", " + rel + ", 1.0\n")
-    e.relations = relationships
+    match =  Classification.getMatchingExpression(e)
+    print(match)
+    match.plot()
+#    relationships = []
+#    for index, symbol in enumerate(e.symbols[:-1]):
+#        rel = classifyRelationship(symbol, e.symbols[index + 1])
+#        relationships.append("EO, " + symbol.ident + ", " + e.symbols[index + 1].ident + ", " + rel + ", 1.0\n")
+#    e.relations = relationships
     return e
 # this returns an expression class rather than just a list of symbols.
 
