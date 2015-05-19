@@ -516,8 +516,9 @@ def classifyRelationship(s1, s2):
 
 def parse(e):
     match =  Classification.getMatchingExpression(e)
-    print(match)
-    match.plot()
+    print("\n\n\n\n\n")
+    print(match[0].relations)
+#    match.plot()
 #    relationships = []
 #    for index, symbol in enumerate(e.symbols[:-1]):
 #        rel = classifyRelationship(symbol, e.symbols[index + 1])
@@ -560,6 +561,9 @@ def readInkml(filename, lgdir, warn=False, train=False):
 #    if 'bert' in filename:
 #        e.plot()
         print("AfterRecog SYMBOLS", len(e.symbols))
+    else:
+        e = parse(e)
+
 
     return e
     

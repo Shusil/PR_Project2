@@ -19,9 +19,8 @@ def trainExprs(exprs, filename):
     store = []
 #    k = 0
     for expr in exprs:
-        if(len(expr.symbols)==60):
-            I = Features.getImgExpr(expr)
-            store.append([expr, I, len(expr.symbols)])
+        I = Features.getImgExpr(expr)
+        store.append([expr, I, len(expr.symbols)])
     pickle.dump(store,file,pickle.HIGHEST_PROTOCOL)
         
 def scc(I1,I2):
@@ -170,6 +169,9 @@ trainDatas = pickle.load(file)
 file = open('testImgs\TestImgs12.mdl','rb')
 testDatas = pickle.load(file)
 
+
+file = open('trainImgs1.mdl','rb')
+trainDatas = pickle.load(file)
 #testExprs = SymbolData.readInkmlDirectory('inkml_test','lg_test')
 #scale = 199
 #testExprs = SymbolData.normalizeExprs(testExprs,scale)

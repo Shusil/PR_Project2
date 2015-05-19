@@ -93,8 +93,14 @@ def classifyExpressions(expressions, keys, model, pca, out, renormalize=True, sh
 
 with open('RF20_FullDepthBoxFeat.mdl', 'rb') as f:
     model, pca, keys =  pickle.load(f)
-with open('trainImgs.mdl', 'rb') as f:
-    trainDatas =  pickle.load(f)
+#import SymbolData
+#file = open('trainImgs1.mdl','rb')
+#trainDatas = pickle.load(file)
+trainDatas = None
+def setTrainData(d):
+    global trainDatas
+    trainDatas = d
+    
 cache = {}
 def classifySymbol(symb, keys=keys, model=model, pca=pca, renormalize=True):
 #    orig = copy.deepcopy(symb) 

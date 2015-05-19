@@ -12,8 +12,8 @@ usage = "Usage: $ python test.py stateFilename outdir (testFile.dat | inkmldir l
 
 #def main(argv=["RF20_FullDepthBoxFeat.mdl","RF20_FullDepthBoxFeatBugFixed","test","testLg"]):
 #def main(argv=["../../../../..//Desktop/rf.mdl","out","test","testLg"]):
-#def main(argv=["RF20_FullDepthBoxFeat.mdl","RF20_FullDepthBoxFeatTrainEquals","train","trainLg"]):
-def main(argv=["../../../../..//Desktop/rf.mdl","outSmall","test1","testLg1"]):
+def main(argv=["RF20_FullDepthBoxFeat.mdl","RF20_ImageBased","inkml_test","lg_test"]):
+#def main(argv=["../../../../..//Desktop/rf.mdl","outSmall","test1","testLg1"]):
 #def main(argv=["RF20_FullDepth.mdl","RF20_FullDepthLGTest","tmpink","tmplg"]):
     if argv is None:
         argv = sys.argv[1:] #dirty trick to make this convenient in the interpreter.
@@ -21,6 +21,9 @@ def main(argv=["../../../../..//Desktop/rf.mdl","outSmall","test1","testLg1"]):
         print(("bad number of args:" , len(argv)))
         print(usage)
     else:
+        with open('trainImgs.mdl', 'rb') as f:
+            trainImgs = pickle.load(f)
+            Classification.setTrainData(trainImgs)
         with open(argv[0], 'rb') as f:
             model, pca, keys =  pickle.load(f)
 
@@ -31,7 +34,7 @@ def main(argv=["../../../../..//Desktop/rf.mdl","outSmall","test1","testLg1"]):
         else:
 #             exprs = SymbolData.readInkmlDirectory(argv[2], argv[3])
              for f in SymbolData.filenames(argv[2]):
-                 exp = SymbolData.readInkml(f, argv[3])
+                 exp = SymbolData.readInkml(f, argv[3],True,True)
                  truths, preds = Classification.classifyExpressions([exp], keys, model, pca, argv[1], showAcc = True)
 
         print("Loaded inkmls")

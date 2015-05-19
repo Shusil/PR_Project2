@@ -16,6 +16,7 @@ RF20_FullDepthBoxFeatTrainEquals
 RF20_FullDepthBoxFeatTrainNew
 RF20_FullDepthBoxFeatBugFixed
 RF20_FullDepthBoxFeatTrainBugFixed
+RF20_ImageBased
 trainImgs
 testImgs
 inkmlTest
