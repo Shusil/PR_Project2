@@ -433,7 +433,7 @@ def mergeFromRecog(e):
             strokes.append(stroke)
         for stroke in pair[1].strokes:
             strokes.append(stroke)
-        mergedSymb = Symbol(strokes, ident='m_')
+        mergedSymb = Symbol(strokes, ident='m_'+str(random.randint(1,100)))
         strokesCopy = copy.deepcopy(strokes)
         sm = Symbol(strokesCopy, ident='m_' + str(random.randint(1,100)), norm=True)   # normalized for classification
         clBoth, symbolBoth = Classification.classifySymbol(sm)
@@ -466,9 +466,9 @@ def mergeFromRecog(e):
         for stroke in pair[2].strokes:
             strokes.append(stroke)
 
-        mergedSymb = Symbol(strokes, ident='m_')
+        mergedSymb = Symbol(strokes, ident='m_' + str(random.randint(0,100)))
         strokesCopy = copy.deepcopy(strokes)
-        sm = Symbol(strokesCopy, ident='m_', norm=True)   # normalized for classification
+        sm = Symbol(strokesCopy, ident='m_' + str(random.randint(0,100)), norm=True)   # normalized for classification
         clBoth, symbolBoth = Classification.classifySymbol(sm)
         newESymbols = []
 #        confs = {}
