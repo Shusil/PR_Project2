@@ -17,6 +17,7 @@ import Classification
 import itertools
 from functools import reduce
 import copy
+import random
 
 
 """ Contains representations for the relevant data,
@@ -434,7 +435,7 @@ def mergeFromRecog(e):
             strokes.append(stroke)
         mergedSymb = Symbol(strokes, ident='m_')
         strokesCopy = copy.deepcopy(strokes)
-        sm = Symbol(strokesCopy, ident='m_', norm=True)   # normalized for classification
+        sm = Symbol(strokesCopy, ident='m_' + str(random.randint(1,100)), norm=True)   # normalized for classification
         clBoth, symbolBoth = Classification.classifySymbol(sm)
         newESymbols = []
 #        confs = {}
