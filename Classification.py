@@ -150,9 +150,9 @@ def getMatchingExpression(testExpr):
     scoreSCC = NP.zeros((len(matchExprns)))
 #    scoreMI = NP.zeros((len(matchExprns)))
     k = 0
-    #testImg = Features.getImgExpr(testExpr)
+    testImg = Features.getImgExpr(testExpr)
     for exprList in matchExprns:
-        scoreSCC[k] = scc(Features.getImgExpr(testExpr),exprList[1])
+        scoreSCC[k] = scc(testImg,exprList[1])
     #    scoreMI[k] = MI(testData[1],exprList[1])
         k+=1
     indSCC = NP.argsort(scoreSCC).astype(int)
@@ -168,6 +168,7 @@ def getMatchingExpression(testExpr):
         matchExprSortSCC.append(matchExprns[i])
     
     return(matchExprSortSCC[-1])
+#    return(matchExprns[indSCC[-1]])
 
 def scc(I1,I2):
     I1 = NP.rint(I1/I1.max()*255).astype('uint8')

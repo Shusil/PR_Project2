@@ -561,8 +561,8 @@ def readInkml(filename, lgdir, warn=False, train=False):
 #    if 'bert' in filename:
 #        e.plot()
         print("AfterRecog SYMBOLS", len(e.symbols))
-    else:
-        e = parse(e)
+#    else:
+#        e = parse(e)
 
 
     return e
