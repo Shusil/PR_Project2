@@ -150,10 +150,6 @@ def getMatchingExpression(testExpr):
     scoreSCC = NP.zeros((len(matchExprns)))
 #    scoreMI = NP.zeros((len(matchExprns)))
     k = 0
-<<<<<<< HEAD
-=======
-    #testImg = Features.getImgExpr(testExpr)
->>>>>>> origin/master
     testImg = Features.getImgExpr(testExpr)
     for exprList in matchExprns:
         scoreSCC[k] = scc(testImg,exprList[1])
