@@ -91,7 +91,7 @@ def classifyExpressions(expressions, keys, model, pca, out, renormalize=True, sh
 #        print( "Accuracy on testing set : ", accuracy_score(NP.concatenate(cors), NP.concatenate(preds)))
     return (cors, preds)
 
-with open('RF20_FullDepthBoxFeat.mdl', 'rb') as f:
+with open('../../../../..//Desktop/rf.mdl', 'rb') as f:
     model, pca, keys =  pickle.load(f)
 #import SymbolData
 #file = open('trainImgs1.mdl','rb')
@@ -151,8 +151,9 @@ def getMatchingExpression(testExpr):
 #    scoreMI = NP.zeros((len(matchExprns)))
     k = 0
     #testImg = Features.getImgExpr(testExpr)
+    testImg = Features.getImgExpr(testExpr)
     for exprList in matchExprns:
-        scoreSCC[k] = scc(Features.getImgExpr(testExpr),exprList[1])
+        scoreSCC[k] = scc(testImg,exprList[1])
     #    scoreMI[k] = MI(testData[1],exprList[1])
         k+=1
     indSCC = NP.argsort(scoreSCC).astype(int)
