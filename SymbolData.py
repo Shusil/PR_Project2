@@ -127,6 +127,9 @@ class Symbol:
     def ys(self):
         return functools.reduce( (lambda a, b : a + b), (list(map ((lambda f: f.ys), self.strokes))), [])
     
+    def center(self):
+        return [(self.xmax() + self.xmin())/2, (self.ymax() + self.ymin())/2]
+        
     def normalize(self):
 
         self.xscale = 1.0
@@ -514,17 +517,39 @@ def mergeFromRecog(e):
 def classifyRelationship(s1, s2):
     return "Right"
 
+def euc_dist(p1, p2):
+    return ((p1[0]-p2[0])**2 + (p1[1] - p2[1])**2)**.5
 def parse(e):
-    match =  Classification.getMatchingExpression(e)
-    print("\n\n\n\n\n")
-    print(match[0].relations)
-#    match.plot()
-#    relationships = []
-#    for index, symbol in enumerate(e.symbols[:-1]):
-#        rel = classifyRelationship(symbol, e.symbols[index + 1])
-#        relationships.append("EO, " + symbol.ident + ", " + e.symbols[index + 1].ident + ", " + rel + ", 1.0\n")
-#    e.relations = relationships
-    return e
+    try:
+        match =  Classification.getMatchingExpression(e)[0]
+        centers = {}
+        for symbol in match.symbols:
+            center = symbol.center()
+            centers[str(center[0]) +' ' + str(center[1])] = symbol
+            
+        keys = [[float(x.split(' ')[0]), float(x.split(' ')[1])] for x in centers.keys()]
+        
+        for symb in e.symbols:
+            center = symb.center()
+            distances = {}
+            for key in keys:
+                distances[euc_dist(center, key)] = key
+            closestDist = distances[min(distances.keys())]
+            closest = centers[str(closestDist[0]) +' ' + str(closestDist[1])]
+            symb.ident = closest.ident
+            keys.remove(closestDist)
+        e.relations = match.relations
+        print(match.relations)
+    #    match.plot()
+    #    relationships = []
+    #    for index, symbol in enumerate(e.symbols[:-1]):
+    #        rel = classifyRelationship(symbol, e.symbols[index + 1])
+    #        relationships.append("EO, " + symbol.ident + ", " + e.symbols[index + 1].ident + ", " + rel + ", 1.0\n")
+    #    e.relations = relationships
+        return e
+    except:
+        e.relations = []
+        return e
 # this returns an expression class rather than just a list of symbols.
 
 def readInkml(filename, lgdir, warn=False, train=False):
