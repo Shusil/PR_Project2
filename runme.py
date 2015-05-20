@@ -19,7 +19,7 @@ def trainExprs(exprs, filename):
     store = []
 #    k = 0
     for expr in exprs:
-        if(len(expr.symbols)==7):
+        if(len(expr.symbols)==19):
             I = Features.getImgExpr(expr)
             store.append([expr, I, len(expr.symbols)])
     pickle.dump(store,file,pickle.HIGHEST_PROTOCOL)
@@ -36,7 +36,11 @@ def scc(I1,I2):
     covXY = NP.sum(X_ctr.T*Y_ctr)
     sqcc = covXY**2/(varX*varY)
     return sqcc
-    
+
+def diff(I1,I2):
+    score = NP.sum(NP.absolute(I1-I2))
+    return score
+
 #def MI(I1,I2):
 ##    I1 = NP.rint(I1/I1.max()*255).astype('uint8')
 ##    I2 = NP.rint(I2/I2.max()*255).astype('uint8')
@@ -192,17 +196,17 @@ exprs = SymbolData.normalizeExprs(exprs,scale)
 #testDatas = pickle.load(file)
 
 
-file = open('trainImgs7.mdl','rb')
+file = open('trainImgs19.mdl','rb')
 trainDatas = pickle.load(file)
 
-file = open('testImgs7.mdl','rb')
+file = open('testImgs19.mdl','rb')
 testDatas = pickle.load(file)
 
 #testExprs = SymbolData.readInkmlDirectory('inkml_test','lg_test')
 #scale = 199
 #testExprs = SymbolData.normalizeExprs(testExprs,scale)
 #testExpr = testExprs[10]
-testData = testDatas[1]
+testData = testDatas[48]
 
 matchExprns = []
 for trainData in trainDatas:
@@ -212,6 +216,7 @@ for trainData in trainDatas:
 #for trainData in trainDatas:
 scoreSCC = NP.zeros((len(matchExprns)))
 scoreMI = NP.zeros((len(matchExprns)))
+scoreDiff = NP.zeros((len(matchExprns)))
 k = 0
 #testImg = Features.getImgExpr(testExpr)
 import time
@@ -220,6 +225,7 @@ times = []
 for exprList in matchExprns:
     scoreSCC[k] = scc(testData[1],exprList[1])
     scoreMI[k] = MI(testData[1],exprList[1])
+    scoreDiff[k] = diff(testData[1],exprList[1])
     k+=1
 print(time.time() - t)
 indSCC = NP.argsort(scoreSCC).astype(int)
@@ -230,6 +236,10 @@ scoreSCC = scoreSCC/scoreSCC[-1]
 #scoreMI = scoreMI[indMI]
 #scoreMI = scoreMI/scoreMI[-1]
 
+indDiff = NP.argsort(scoreDiff).astype(int)
+scoreDiff = scoreDiff[indDiff]
+scoreDiff = scoreDiff/scoreDiff[0]
+
 matchExprSortSCC = []
 for i in indSCC:
     matchExprSortSCC.append(matchExprns[i])
@@ -237,6 +247,10 @@ for i in indSCC:
 #matchExprSortMI = []
 #for i in indMI:
 #    matchExprSortMI.append(matchExprns[i])
+
+matchExprSortDiff = []
+for i in indDiff:
+    matchExprSortDiff.append(matchExprns[i])
 
 print(testData[0].relations)
 plt.figure()
@@ -266,3 +280,13 @@ for i in [-1,-2,-3]:
 #    matchExprSortMI[i][0].plot()
     
 ######################################################################
+for i in [0,1,2]:
+    print(scoreDiff[i])
+    print(matchExprSortDiff[i][0].relations)
+    plt.figure()
+    I = NP.flipud(matchExprSortDiff[i][1])
+    plt.imshow(I)
+    plt.gray()
+    plt.show()
+    matchExprSortDiff[i][0].plot()
+    

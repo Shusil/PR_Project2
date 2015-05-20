@@ -115,7 +115,7 @@ def getImgExpr(expr):
 #        for j in range(len(stroke.xs)-1):
 #            rr,cc = line(round(stroke.ys[j]),round(stroke.xs[j]),round(stroke.ys[j+1]),round(stroke.xs[j+1]))
 #            I[rr,cc] = 255
-    img = resize(I,(100,300))
+#    img = resize(I,(100,300))
 #    img = rank.mean(img, selem=square(1))
 #    img = binary_closing(img,selem=square(1))
 #    if(img.max()>0):
@@ -125,7 +125,7 @@ def getImgExpr(expr):
 #    img = gaussian_filter(img,sigma=4,mode='reflect')
 #    if(img.max()>0):
 #        img = img/img.max()
-    return(img)
+#    return(img)
     
 # Show image for the symbol
 def showImg(symbol):
