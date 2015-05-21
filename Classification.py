@@ -51,7 +51,7 @@ def train(model, training, keys, pca_num=None):
         pca = sklearn.decomposition.PCA(n_components=pca_num)
         pca.fit(f)
         f = pca.transform(f)
-    model.fit(Features.features(training), SymbolData.classNumbers(training, keys))
+    model.fit(f, SymbolData.classNumbers(training, keys))
     return (model, pca)
 
 
@@ -110,7 +110,8 @@ def setClassificationModel(model, pca, keys):
     k = keys 
     
 cache = {}
-def classifySymbol(symb, keys=k, model=m, pca=p, renormalize=True):
+#def classifySymbol(symb, keys=k, model=m, pca=p, renormalize=True):
+def classifySymbol(symb, renormalize=True):
 #    orig = copy.deepcopy(symb) 
     global cache
 #    print(cache)
@@ -122,11 +123,16 @@ def classifySymbol(symb, keys=k, model=m, pca=p, renormalize=True):
         symbl = SymbolData.normalize(symbl, 29)
     f = Features.features(symbl)
     
-    if (pca != None):
-        f = pca.transform(f)
-    pred = model.predict_proba(f)
-    predChar = model.predict(f)
-    predChar = keys[predChar]
+#    if (pca != None):
+#        f = pca.transform(f)
+#    pred = model.predict_proba(f[0])
+#    predChar = model.predict(f)
+#    predChar = keys[predChar]
+    if (p != None):
+        f = p.transform(f)
+    pred = m.predict_proba(f)
+    predChar = m.predict(f)
+    predChar = k[predChar]
     cache[str(symb)] = [pred, predChar]
     return pred, predChar
     
@@ -174,12 +180,12 @@ def getMatchingExpression(testExpr, renormalize=True):
 #    scoreMI = scoreMI[indMI]
 #    scoreMI = scoreMI/scoreMI[-1]
     
-    matchExprSortSCC = []
-    for i in indSCC:
-        matchExprSortSCC.append(matchExprns[i])
-    
-    return(matchExprSortSCC[-1])
-#    return(matchExprns[indSCC[-1]])
+#    matchExprSortSCC = []
+#    for i in indSCC:
+#        matchExprSortSCC.append(matchExprns[i])
+#    
+#    return(matchExprSortSCC[-1])
+    return(matchExprns[indSCC[-1]])
 
 #def scc(I1,I2):
 #    I1 = NP.rint(I1/I1.max()*255).astype('uint8')

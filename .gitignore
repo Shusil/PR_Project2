@@ -18,6 +18,8 @@ RF20_FullDepthBoxFeatBugFixed
 RF20_FullDepthBoxFeatTrainBugFixed
 RF20_ImageBased
 smallOut
+outFinal
+outPerfectSeg
 trainImgs
 testImgs
 inkmlTest

@@ -14,7 +14,7 @@ usage = "Usage: $ python test.py stateFilename outdir (testFile.dat | inkmldir l
 #def main(argv=["../../../../..//Desktop/rf.mdl","out","test","testLg"]):
 #def main(argv=["../../../../..//Desktop/rf.mdl","outSmall","test1","testLg1"]):
 
-def main(argv=["RF20_FullDepthBoxFeat.mdl","smallOut","inkml_test","lg_test"]):
+def main(argv=["RF20_FullDepthBoxFeat.mdl","outFinal","test","testLg"]):
 #def main(argv=["../../../../..//Desktop/rf.mdl","outSmall","test1","testLg1"]):
 #def main(argv=["RF20_FullDepth.mdl","RF20_FullDepthLGTest","tmpink","tmplg"]):
     if argv is None:
@@ -28,7 +28,7 @@ def main(argv=["RF20_FullDepthBoxFeat.mdl","smallOut","inkml_test","lg_test"]):
             Classification.setTrainData(trainImgs)
         with open(argv[0], 'rb') as f:
             model, pca, keys =  pickle.load(f)
-        Classification.setClassificationModel(model,pca,keys)        
+            Classification.setClassificationModel(model,pca,keys)        
         if (len( argv) == 3):  
         
             with open(argv[2], 'rb') as f:
@@ -39,7 +39,7 @@ def main(argv=["RF20_FullDepthBoxFeat.mdl","smallOut","inkml_test","lg_test"]):
              i = 0
              for f in SymbolData.filenames(argv[2]):
                  print(i, "/",tot)
-                 exp = SymbolData.readInkml(f, argv[3],True,True)
+                 exp = SymbolData.readInkml(f, argv[3],True,False)
                  truths, preds = Classification.classifyExpressions([exp], keys, model, pca, argv[1], showAcc = True)
                  i+=1
 

@@ -399,7 +399,10 @@ def fnametolg(filename, lgdir):
     name, ext = os.path.splitext(fname)
     return os.path.join(lgdir, (name + ".lg"))
 
-def mergeFromCrossings(exp):    
+def mergeFromCrossings(expOrig):
+    exp = copy.deepcopy(expOrig)
+    exp = normalizeExprs([expOrig],99)
+    exp = exp[0]    
     crossings = getCrossStroke(exp)
     allSymbols = []
     count = 0
@@ -511,7 +514,7 @@ def mergeFromRecog(e):
         #     if(pairToMerge[3] != (l-3)):
         #         newESymbols.append(e.symbols[l-2])
            
-        return Expression(name=e.name, symbols=newESymbols, relations=e.relations, norm=False)
+        return Expression(name=e.name, symbols=newESymbols, relations=e.relations, norm=True)
     return e
 
 def classifyRelationship(s1, s2):
