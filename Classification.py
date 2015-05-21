@@ -62,13 +62,13 @@ def classifyExpressions(expressions, keys, model, pca, out, renormalize=True, sh
 
     cors = list([])
     preds = list([])
-    tot = len(expressions)
+#    tot = len(expressions)
     i = 0
     
 #    s = showAcc
     
     for expr in expressions:
-        print(expr)
+#        print(expr)
         correct, predicted =  classifyExpression(expr, keys, model, pca, renormalize)
         #assert (len(correct) == len(predicted))
 #        if s:
@@ -78,7 +78,6 @@ def classifyExpressions(expressions, keys, model, pca, out, renormalize=True, sh
 #            cors = [[], []]
         
         preds = preds + [predicted]
-        print(i, "/",tot)
         f = (lambda p: keys[p])
             #    expr.classes = map (f, preds[i])
 
@@ -91,8 +90,8 @@ def classifyExpressions(expressions, keys, model, pca, out, renormalize=True, sh
 #        print( "Accuracy on testing set : ", accuracy_score(NP.concatenate(cors), NP.concatenate(preds)))
     return (cors, preds)
 
-with open('../../../../..//Desktop/rf.mdl', 'rb') as f:
-    model, pca, keys =  pickle.load(f)
+#with open('../../../../..//Desktop/rf.mdl', 'rb') as f:
+#    model, pca, keys =  pickle.load(f)
 #import SymbolData
 #file = open('trainImgs1.mdl','rb')
 #trainDatas = pickle.load(file)
@@ -100,9 +99,18 @@ trainDatas = None
 def setTrainData(d):
     global trainDatas
     trainDatas = d
+
+m = None
+p = None
+k = None
+def setClassificationModel(model, pca, keys):
+    global m, p, k    
+    m = model
+    p = pca
+    k = keys 
     
 cache = {}
-def classifySymbol(symb, keys=keys, model=model, pca=pca, renormalize=True):
+def classifySymbol(symb, keys=k, model=m, pca=p, renormalize=True):
 #    orig = copy.deepcopy(symb) 
     global cache
 #    print(cache)
@@ -170,9 +178,20 @@ def getMatchingExpression(testExpr):
     return(matchExprSortSCC[-1])
 #    return(matchExprns[indSCC[-1]])
 
+#def scc(I1,I2):
+#    I1 = NP.rint(I1/I1.max()*255).astype('uint8')
+#    I2 = NP.rint(I2/I2.max()*255).astype('uint8')
+#    X = NP.reshape(I1,(I1.size))
+#    Y = NP.reshape(I2,(I2.size))
+#    X_ctr = X-NP.mean(X)
+#    Y_ctr = Y-NP.mean(Y)
+#    varX = NP.sum(X_ctr.T*X_ctr)
+#    varY = NP.sum(Y_ctr.T*Y_ctr)
+#    covXY = NP.sum(X_ctr.T*Y_ctr)
+#    sqcc = covXY**2/(varX*varY)
+#    return sqcc
+
 def scc(I1,I2):
-    I1 = NP.rint(I1/I1.max()*255).astype('uint8')
-    I2 = NP.rint(I2/I2.max()*255).astype('uint8')
     X = NP.reshape(I1,(I1.size))
     Y = NP.reshape(I2,(I2.size))
     X_ctr = X-NP.mean(X)
@@ -183,13 +202,28 @@ def scc(I1,I2):
     sqcc = covXY**2/(varX*varY)
     return sqcc
     
+#def MI(I1,I2):
+#    I1 = NP.rint(I1/I1.max()*255).astype('uint8')
+#    I2 = NP.rint(I2/I2.max()*255).astype('uint8')
+#    mat12 = NP.zeros((256,256))
+#    for i in range(I1.shape[0]):
+#        for j in range(I1.shape[1]):
+#            mat12[I1[i,j],I2[i,j]] += 1
+#    mat12 = mat12/NP.sum(mat12)
+#    I1_marg = NP.sum(mat12,axis=1)
+#    I2_marg = NP.sum(mat12,axis=0)
+#    H1 = -NP.sum(NP.multiply(I1_marg , NP.log2(I1_marg + (I1_marg==0))))
+#    H2 = -NP.sum(NP.multiply(I2_marg , NP.log2(I2_marg + (I2_marg==0))))
+#    mat12 = NP.reshape(mat12,(mat12.size))
+#    H12 = -NP.sum(NP.multiply(mat12, NP.log2(mat12 + (mat12==0))))
+#    mi = H1+H2-H12    
+#    return(mi)
+
 def MI(I1,I2):
-    I1 = NP.rint(I1/I1.max()*255).astype('uint8')
-    I2 = NP.rint(I2/I2.max()*255).astype('uint8')
-    mat12 = NP.zeros((256,256))
-    for i in range(I1.shape[0]):
-        for j in range(I1.shape[1]):
-            mat12[I1[i,j],I2[i,j]] += 1
+    I1 = NP.reshape(I1,[I1.size])
+    I2 = NP.reshape(I2,[I2.size])
+    h = NP.histogram2d(I1,I2,2)
+    mat12 = h[0]
     mat12 = mat12/NP.sum(mat12)
     I1_marg = NP.sum(mat12,axis=1)
     I2_marg = NP.sum(mat12,axis=0)

@@ -153,7 +153,7 @@ class Symbol:
 
     # Given a class, this produces lines for an lg file.
     def lgline(self, clss):
-        print("STROKES", self.strokes)
+#        print("STROKES", self.strokes)
         self.line = 'O, ' + self.ident + ', ' + clss + ', 1.0, ' + (', '.join(list(map((lambda s: str(s.ident)), self.strokes)))) + '\n'
         #do we need a newline here? Return to this if so.        
         return self.line
@@ -269,8 +269,8 @@ class Expression:
         #print (self.clss)
         #for c in (self.clss):
             #print ( c)
-        print('clss', self.clss)
-        print(len(self.symbols))
+#        print('clss', self.clss)
+#        print(len(self.symbols))
         for symbol in self.symbols:
            # print (self.i)
             self.symblines.append(symbol.lgline(self.clss[self.i]))
@@ -539,7 +539,7 @@ def parse(e):
             symb.ident = closest.ident
             keys.remove(closestDist)
         e.relations = match.relations
-        print(match.relations)
+#        print(match.relations)
     #    match.plot()
     #    relationships = []
     #    for index, symbol in enumerate(e.symbols[:-1]):
@@ -586,8 +586,8 @@ def readInkml(filename, lgdir, warn=False, train=False):
 #    if 'bert' in filename:
 #        e.plot()
         print("AfterRecog SYMBOLS", len(e.symbols))
-#    else:
-#        e = parse(e)
+    else:
+        e = parse(e)
 
 
     return e

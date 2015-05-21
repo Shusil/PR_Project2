@@ -71,51 +71,13 @@ def getImg(symbol):
     img[img<0.5] = 0
     return(img)
 
-def getImgExpr(expr):
-    I = NP.zeros(((round(expr.ymax())+1),(round(expr.xmax())+1)),dtype=NP.uint8)
-    for stroke in expr.strokes:
-        for j in range(len(stroke.xs)-1):
-            rr,cc = line(round(stroke.ys[j]),round(stroke.xs[j]),round(stroke.ys[j+1]),round(stroke.xs[j+1]))
-            I[rr,cc] = 255
-    img = resize(I,(100,200))
-    img = rank.mean(img, selem=square(1))
-    img = binary_closing(img,selem=square(1))
-    if(img.max()>0):
-        img = img/img.max()
-#    img[img>=0.5] = 1
-#    img[img<0.5] = 0
-    img = gaussian_filter(img,sigma=4,mode='reflect')
-    if(img.max()>0):
-        img = img/img.max()
-    return(img)
-
 #def getImgExpr(expr):
-#    I = NP.zeros(((round(expr.ymax())+1),(round(expr.xmax())+1)),dtype=NP.bool)
-#    J = NP.zeros(((round(expr.ymax())+1),(round(expr.xmax())+1)),dtype=NP.bool)
-#    for symbol in expr.symbols:
-#        rr1 = round(symbol.ymin())
-#        rr2 = round(symbol.ymax())
-#        cc1 = round(symbol.xmin())
-#        cc2 = round(symbol.xmax())
-#
-#        if(rr2==rr1):
-#            rr2 = rr1+3
-#        if(cc2==cc1):
-#            cc2 = cc1+3
-#        if(symbol.correctClass == '\\sqrt'):
-#            J[rr1:rr2,cc1:cc2] = 1
-#            J[rr1+3:rr2-3,cc1+3:cc2-3] = 0
-#            I = I+J
-#            J[:,:] = 0
-#        else:
-#            I[rr1:rr2,cc1:cc2] = 1
-
-        
+#    I = NP.zeros(((round(expr.ymax())+1),(round(expr.xmax())+1)),dtype=NP.uint8)
 #    for stroke in expr.strokes:
 #        for j in range(len(stroke.xs)-1):
 #            rr,cc = line(round(stroke.ys[j]),round(stroke.xs[j]),round(stroke.ys[j+1]),round(stroke.xs[j+1]))
 #            I[rr,cc] = 255
-#    img = resize(I,(100,300))
+#    img = resize(I,(100,200))
 #    img = rank.mean(img, selem=square(1))
 #    img = binary_closing(img,selem=square(1))
 #    if(img.max()>0):
@@ -126,7 +88,29 @@ def getImgExpr(expr):
 #    if(img.max()>0):
 #        img = img/img.max()
 #    return(img)
-    
+
+def getImgExpr(expr):
+    I = NP.zeros(((round(expr.ymax())+1),(round(expr.xmax())+1)),dtype=NP.bool)
+    J = NP.zeros(((round(expr.ymax())+1),(round(expr.xmax())+1)),dtype=NP.bool)
+    for symbol in expr.symbols:
+        rr1 = round(symbol.ymin())
+        rr2 = round(symbol.ymax())
+        cc1 = round(symbol.xmin())
+        cc2 = round(symbol.xmax())
+
+        if(rr2==rr1):
+            rr2 = rr1+3
+        if(cc2==cc1):
+            cc2 = cc1+3
+        if(symbol.correctClass == '\\sqrt'):
+            J[rr1:rr2,cc1:cc2] = 1
+            J[rr1+3:rr2-3,cc1+3:cc2-3] = 0
+            I = I+J
+            J[:,:] = 0
+        else:
+            I[rr1:rr2,cc1:cc2] = 1
+
+            
 # Show image for the symbol
 def showImg(symbol):
     plt.figure()

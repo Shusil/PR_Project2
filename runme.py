@@ -59,16 +59,10 @@ def diff(I1,I2):
 #    return(mi)
 
 def MI(I1,I2):
-#    I1 = NP.rint(I1/I1.max()*255).astype('uint8')
-#    I2 = NP.rint(I2/I2.max()*255).astype('uint8')
     I1 = NP.reshape(I1,[I1.size])
     I2 = NP.reshape(I2,[I2.size])
     h = NP.histogram2d(I1,I2,2)
     mat12 = h[0]
-#    mat12 = NP.zeros((2,2))
-#    for i in range(I1.shape[0]):
-#        for j in range(I1.shape[1]):
-#            mat12[I1[i,j],I2[i,j]] += 1
     mat12 = mat12/NP.sum(mat12)
     I1_marg = NP.sum(mat12,axis=1)
     I2_marg = NP.sum(mat12,axis=0)
@@ -206,7 +200,7 @@ testDatas = pickle.load(file)
 #scale = 199
 #testExprs = SymbolData.normalizeExprs(testExprs,scale)
 #testExpr = testExprs[10]
-testData = testDatas[48]
+testData = testDatas[20]
 
 matchExprns = []
 for trainData in trainDatas:

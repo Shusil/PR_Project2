@@ -18,7 +18,7 @@ def main(argv=None):
         if (len ( argv ) == 3):
             exprs, keys = SymbolData.unpickleSymbols(argv[2])
         else:
-            exprs = SymbolData.readInkmlDirectory(argv[2], argv[3],False,True)
+            exprs = SymbolData.readInkmlDirectory(argv[2], argv[3],True,True)
             keys = SymbolData.defaultClasses
             
         if (argv[0] == "-nn" ):
