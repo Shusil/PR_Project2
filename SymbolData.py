@@ -364,8 +364,8 @@ def constructTraceGroupsFromSymbols(root, traces):
 
 
 
-def readFile(filename, warn=True, train=False):
-    if not train:
+def readFile(filename, warn=True, option='-t'):
+    if(option=='-pcs'):
         try:
             print ("Parsing", filename)
             tree = ET.parse(filename)
@@ -555,8 +555,8 @@ def parse(e):
         return e
 # this returns an expression class rather than just a list of symbols.
 
-def readInkml(filename, lgdir, warn=False, train=False):
-    symbols = readFile(filename, warn, train) #trainis the last param
+def readInkml(filename, lgdir, warn=False, option='-t'):
+    symbols = readFile(filename, warn, option) #trainis the last param
     rdir, filenm = os.path.split(filename)
     name, ext = os.path.splitext(filenm)
     lgfile = fnametolg(filename, lgdir)
@@ -565,7 +565,7 @@ def readInkml(filename, lgdir, warn=False, train=False):
         symbols = [Symbol([tmp], ident='y_')]
     e = Expression(name, symbols, readLG(lgfile), norm=True)
 
-    if not train:
+    if(option=='-pcs'):
         print("PREMERGE SYMBOLS", len(e.symbols))
         e = mergeFromCrossings(e)
         print("AfterCross SYMBOLS", len(e.symbols))
@@ -589,9 +589,9 @@ def readInkml(filename, lgdir, warn=False, train=False):
 #    if 'bert' in filename:
 #        e.plot()
         print("AfterRecog SYMBOLS", len(e.symbols))
-    else:
-        e = parse(e)
 
+    if(option=='-pc'):
+        e = parse(e)
 
     return e
     
@@ -629,9 +629,9 @@ def readDirectory(filename, warn=False):
     fnames = filenames(filename)
     return reduce( (lambda a, b : a + b), (list(map ((lambda f: readFile(f, warn)), fnames))), [])
 
-def readInkmlDirectory(filename, lgdir, warn=False, train=False):
+def readInkmlDirectory(filename, lgdir, warn=False, option='-t'):
     fnames = filenames(filename)
-    return list(map((lambda f: readInkml(f, lgdir, warn, train)), fnames))
+    return list(map((lambda f: readInkml(f, lgdir, warn, option)), fnames))
 
 def allSymbols(inkmls):
     return reduce( (lambda a, b: a + b), (list(map ((lambda i: i.symbols), inkmls))))

@@ -21,7 +21,7 @@ def main(argv=['trainImgsNew.mdl','train','trainLg']):
         print(("bad number of args:" , len(argv)))
         print (usage)
     else:
-        exprs = SymbolData.readInkmlDirectory(argv[1], argv[2],True,True)
+        exprs = SymbolData.readInkmlDirectory(argv[1], argv[2],True)
         scale = 299
         exprs = SymbolData.normalizeExprs(exprs,scale)
         

@@ -17,8 +17,10 @@ RF20_FullDepthBoxFeatTrainNew
 RF20_FullDepthBoxFeatBugFixed
 RF20_FullDepthBoxFeatTrainBugFixed
 RF20_ImageBased
-smallOut
+outSmall
 outFinal
+outPerfectSegBlurred
+outFinalBlurred
 outPerfectSeg
 trainImgs
 testImgs
