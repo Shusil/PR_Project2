@@ -148,8 +148,11 @@ def classifyExpression(expression, keys, model, pca, renormalize=True):
     return (NP.array(SymbolData.classNumbers(symbs, keys)), pred)
 
 
-def getMatchingExpression(testExpr):
+def getMatchingExpression(testExpr, renormalize=True):
     matchExprns = []
+    if renormalize:
+        testExpr = SymbolData.normalizeExprs([testExpr],299)
+    testExpr = testExpr[0]
     for trainData in trainDatas:
         if(trainData[2]==len(testExpr.symbols)):
             matchExprns.append(trainData)

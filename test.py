@@ -23,7 +23,7 @@ def main(argv=["RF20_FullDepthBoxFeat.mdl","smallOut","inkml_test","lg_test"]):
         print(("bad number of args:" , len(argv)))
         print(usage)
     else:
-        with open('trainImgs.mdl', 'rb') as f:
+        with open('trainImgsNew.mdl', 'rb') as f:
             trainImgs = pickle.load(f)
             Classification.setTrainData(trainImgs)
         with open(argv[0], 'rb') as f:

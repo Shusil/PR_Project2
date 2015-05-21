@@ -14,23 +14,22 @@ import Features
 
 usage = "Usage: $ python trainExprs.py outFilename(modelFilename) inkmldir lgdir"
 
-def main(argv=None):
+def main(argv=['trainImgsNew.mdl','train','trainLg']):
     if argv is None:
         argv = sys.argv[1:] #dirty trick to make this convenient in the interpreter.
-    if (len (argv) < 3 or len (argv) > 4): 
+    if (len (argv)!=3): 
         print(("bad number of args:" , len(argv)))
         print (usage)
     else:
-        exprs = SymbolData.readInkmlDirectory(argv[2], argv[3],True,True)
+        exprs = SymbolData.readInkmlDirectory(argv[1], argv[2],True,True)
         scale = 299
         exprs = SymbolData.normalizeExprs(exprs,scale)
         
-        file = open(argv[1],'wb')
+        file = open(argv[0],'wb')
         store = []
         for expr in exprs:
-            if(len(expr.symbols)==19):
-                I = Features.getImgExpr(expr)
-                store.append([expr, I, len(expr.symbols)])
+            I = Features.getImgExpr(expr)
+            store.append([expr, I, len(expr.symbols)])
         pickle.dump(store,file,pickle.HIGHEST_PROTOCOL)
 
 if __name__ == "__main__":

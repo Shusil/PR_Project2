@@ -109,6 +109,8 @@ def getImgExpr(expr):
             J[:,:] = 0
         else:
             I[rr1:rr2,cc1:cc2] = 1
+    img = resize(I,(100,300))
+    return(img)
 
             
 # Show image for the symbol
